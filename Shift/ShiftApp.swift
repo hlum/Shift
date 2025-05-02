@@ -12,7 +12,7 @@ import SwiftData
 struct ShiftApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Shift.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -25,7 +25,7 @@ struct ShiftApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            CalendarView()
         }
         .modelContainer(sharedModelContainer)
     }
