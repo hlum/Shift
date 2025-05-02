@@ -10,7 +10,7 @@ import SwiftData
 
 @Model
 final class Shift {
-    var id: String = UUID().uuidString
+    @Attribute(.unique) var id: String = UUID().uuidString
     var name: String
     var startTime: Date
     var endTime: Date
