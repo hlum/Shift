@@ -17,9 +17,8 @@ final class SwiftDataShiftRepo: ShiftRepository {
     
     
     
-    func fetchShifts(descriptor: FetchDescriptor<Shift>) throws -> [Shift] {
-        let shiftObjects = try context.fetch(descriptor)
-        
+    func fetchShifts() throws -> [Shift] {
+        let shiftObjects = try context.fetch(FetchDescriptor<Shift>())
         return shiftObjects.map {
             Shift(
                 id: $0.id,
@@ -39,23 +38,20 @@ final class SwiftDataShiftRepo: ShiftRepository {
     
     
     func updateShift(_ shift: Shift) throws {
-        let descriptor = FetchDescriptor<Shift>(predicate: #Predicate { $0.id == shift.id })
-        
-        if let object = try context.fetch(descriptor).first {
-            object.name = shift.name
-            object.startTime = shift.startTime
-            object.endTime = shift.endTime
+        let id = shift.id // Capture the value
+        let descriptor = FetchDescriptor<Shift>(predicate: #Predicate { $0.id == id })
+        if let existing = try context.fetch(descriptor).first {
+            existing.name = shift.name
+            existing.startTime = shift.startTime
+            existing.endTime = shift.endTime
         }
-        
     }
-    
-    
+
+
     
     func deleteShift(_ shift: Shift) throws {
-        let descriptor = FetchDescriptor<Shift>(predicate: #Predicate { $0.id == shift.id })
-        if let object = try context.fetch(descriptor).first {
-            context.delete(object)
-        }
+        context.delete(shift)
+        
     }
  
     

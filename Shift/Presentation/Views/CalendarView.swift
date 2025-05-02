@@ -11,6 +11,7 @@ import SwiftData
 
 
 struct CalendarView: View {
+    @StateObject var vm: CalendarViewModel
     var body: some View {
         VStack {}
     }
@@ -64,8 +65,9 @@ struct CalendarView: View {
 //        }
 //    }
 //}
+//
 
 #Preview {
-    CalendarView()
+    CalendarView(vm: CalendarViewModel.preview())
         .modelContainer(for: Shift.self, inMemory: true)
 }

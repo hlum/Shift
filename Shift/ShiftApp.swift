@@ -22,10 +22,16 @@ struct ShiftApp: App {
             fatalError("Could not create ModelContainer: \(error)")
         }
     }()
+    
+
 
     var body: some Scene {
         WindowGroup {
-            CalendarView()
+            let repository = SwiftDataShiftRepo(context: sharedModelContainer.mainContext)
+            let useCase = ShiftUseCase(shiftRepository: repository)
+            let viewModel = CalendarViewModel(shiftUseCase: useCase)
+            
+            CalendarView(vm: viewModel)
         }
         .modelContainer(sharedModelContainer)
     }

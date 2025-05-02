@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 protocol ShiftRepository {
-    func fetchShifts(descriptor: FetchDescriptor<Shift>) throws -> [Shift]
+    func fetchShifts() throws -> [Shift]
     func addShift(_ shift: Shift) throws
     func updateShift(_ shift: Shift) throws
     func deleteShift(_ shift: Shift) throws
