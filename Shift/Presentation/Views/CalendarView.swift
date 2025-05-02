@@ -15,11 +15,15 @@ struct CalendarView: View {
     var body: some View {
         
         VStack {
-            FSCalendarView()
-                .frame(maxWidth: .infinity)
+            FSCalendarView(
+                selectedDate: $vm.selectedDate
+            )
+            .frame(maxWidth: .infinity)
+
+
             
             VStack {
-                selectedDateHeader(selectedDate: Date())
+                selectedDateHeader(selectedDate: vm.selectedDate)
                 Spacer()
             }
             .frame(maxWidth: .infinity)

@@ -9,6 +9,7 @@ import Foundation
 import SwiftData
 
 final class CalendarViewModel: ObservableObject {
+    @Published var selectedDate: Date = Date()
     @Published var shifts: [Shift] = []
     
     private let shiftUseCase: ShiftUseCase

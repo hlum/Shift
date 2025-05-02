@@ -17,8 +17,8 @@ final class SwiftDataShiftRepo: ShiftRepository {
     
     
     
-    func fetchShifts() throws -> [Shift] {
-        let shiftObjects = try context.fetch(FetchDescriptor<Shift>())
+    func fetchShifts(descriptor: FetchDescriptor<Shift>) throws -> [Shift] {
+        let shiftObjects = try context.fetch(descriptor)
         return shiftObjects.map {
             Shift(
                 id: $0.id,
@@ -51,7 +51,6 @@ final class SwiftDataShiftRepo: ShiftRepository {
     
     func deleteShift(_ shift: Shift) throws {
         context.delete(shift)
-        
     }
  
     

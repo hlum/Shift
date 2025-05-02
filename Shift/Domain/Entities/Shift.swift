@@ -22,3 +22,5 @@ final class Shift {
         self.endTime = endTime
     }
 }
+
+

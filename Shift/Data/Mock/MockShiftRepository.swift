@@ -14,7 +14,7 @@ final class MockShiftRepository: ShiftRepository {
         .init(id: UUID().uuidString, name: "Test2", startTime: Date(), endTime: Date())
     ]
     
-    func fetchShifts() throws -> [Shift] {
+    func fetchShifts(descriptor: FetchDescriptor<Shift>) throws -> [Shift] {
         return shifts
     }
     
