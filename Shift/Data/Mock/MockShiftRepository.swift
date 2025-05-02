@@ -9,19 +9,28 @@ import Foundation
 import SwiftData
 
 final class MockShiftRepository: ShiftRepository {
+    var shifts: [Shift] = [
+        .init(id: UUID().uuidString, name: "Test1", startTime: Date(), endTime: Date()),
+        .init(id: UUID().uuidString, name: "Test2", startTime: Date(), endTime: Date())
+    ]
     
     func fetchShifts() throws -> [Shift] {
-        return [
-            .init(id: UUID().uuidString, name: "1", startTime: Date(), endTime: Date()),
-            .init(id: UUID().uuidString, name: "2", startTime: Date(), endTime: Date())
-        ]
+        return shifts
     }
     
-    func addShift(_ shift: Shift) throws { }
+    func addShift(_ shift: Shift) throws {
+        shifts.append(shift)
+    }
     
-    func updateShift(_ shift: Shift) throws { }
+    func updateShift(_ shift: Shift) throws {
+        guard let index = shifts.firstIndex(where: {shift.id == $0.id}) else { return }
+        shifts[index] = shift
+    }
     
-    func deleteShift(_ shift: Shift) throws { }
+    func deleteShift(_ shift: Shift) throws {
+        guard let index = shifts.firstIndex(where: {shift.id == $0.id}) else { return }
+        shifts.remove(at: index)
+    }
     
     
 }

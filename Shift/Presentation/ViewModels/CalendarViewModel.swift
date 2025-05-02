@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftData
 
 final class CalendarViewModel: ObservableObject {
     @Published var shifts: [Shift] = []
@@ -14,7 +15,34 @@ final class CalendarViewModel: ObservableObject {
     
     init(shiftUseCase: ShiftUseCase) {
         self.shiftUseCase = shiftUseCase
+        fetchShifts()
     }
+    
+    
+    func addShift(_ shift: Shift) {
+        do {
+            try shiftUseCase.addShift(shift)
+            self.fetchShifts()
+        } catch {
+            print("Error adding shift: \(error.localizedDescription)")
+        }
+    }
+    
+    
+    func fetchShifts() {
+        do {
+            let shifts = try shiftUseCase.fetchShifts(descriptor: FetchDescriptor<Shift>())
+            
+            DispatchQueue.main.async {
+                self.shifts = shifts
+            }
+            
+        } catch {
+            print("Error fetching shifts: \(error.localizedDescription)")
+        }
+    }
+    
+    
 }
 
 
