@@ -6,3 +6,27 @@
 //
 
 import Foundation
+import SwiftData
+import SwiftUI
+
+@Model
+final class Company: Identifiable{
+    @Attribute(.unique) var id: String = UUID().uuidString
+    var name: String
+    var color: Color
+    var endDate: Date
+    var payDay: PayDay
+    var salary: Salary
+    
+    @Relationship var shifts: [Shift] = []
+    
+    
+    init(id: String, name: String, color: Color, endDate: Date, payDay: PayDay, salary: Salary) {
+        self.id = id
+        self.name = name
+        self.color = color
+        self.endDate = endDate
+        self.payDay = payDay
+        self.salary = salary
+    }
+}

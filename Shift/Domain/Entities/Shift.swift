@@ -14,6 +14,7 @@ final class Shift {
     var name: String
     var startTime: Date
     var endTime: Date
+    var company: Company
     
     init(id: String, name: String, startTime: Date, endTime: Date) {
         self.id = id
