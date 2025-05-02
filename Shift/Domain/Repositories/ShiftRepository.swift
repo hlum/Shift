@@ -1,0 +1,16 @@
+//
+//  ShiftRepository.swift
+//  Shift
+//
+//  Created by cmStudent on 2025/05/02.
+//
+
+import Foundation
+import SwiftData
+
+protocol ShiftRepository {
+    func fetchShifts(descriptor: FetchDescriptor<Shift>) throws -> [Shift]
+    func addShift(_ shift: Shift) throws
+    func updateShift(_ shift: Shift) throws
+    func deleteShift(id: Int) throws
+}
