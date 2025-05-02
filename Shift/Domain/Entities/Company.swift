@@ -13,7 +13,7 @@ import SwiftUI
 final class Company: Identifiable{
     @Attribute(.unique) var id: String = UUID().uuidString
     var name: String
-    var color: Color
+    var color: String
     var endDate: Date
     var payDay: PayDay
     var salary: Salary
@@ -21,7 +21,7 @@ final class Company: Identifiable{
     @Relationship var shifts: [Shift] = []
     
     
-    init(id: String, name: String, color: Color, endDate: Date, payDay: PayDay, salary: Salary) {
+    init(id: String, name: String, color: String, endDate: Date, payDay: PayDay, salary: Salary) {
         self.id = id
         self.name = name
         self.color = color

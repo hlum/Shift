@@ -5,7 +5,8 @@
 //  Created by cmStudent on 2025/05/03.
 //
 
-
+import Foundation
+import SwiftData
 
 @Model
 final class Salary {
@@ -33,6 +34,6 @@ final class Salary {
     init(salary: Int, startTime: Date, endTime: Date) {
         self.salary = salary
         self.startTime = startTime
-        self.startTime = endTime
+        self.endTime = endTime
     }
 }

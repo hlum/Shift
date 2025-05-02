@@ -16,11 +16,12 @@ final class Shift {
     var endTime: Date
     var company: Company
     
-    init(id: String, name: String, startTime: Date, endTime: Date) {
+    init(id: String, name: String, startTime: Date, endTime: Date, company: Company) {
         self.id = id
         self.name = name
         self.startTime = startTime
         self.endTime = endTime
+        self.company = company
     }
 }
 

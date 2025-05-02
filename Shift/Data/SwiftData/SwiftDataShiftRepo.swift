@@ -24,7 +24,8 @@ final class SwiftDataShiftRepo: ShiftRepository {
                 id: $0.id,
                 name: $0.name,
                 startTime: $0.startTime,
-                endTime: $0.endTime
+                endTime: $0.endTime,
+                company: $0.company
             )
         }
     }
