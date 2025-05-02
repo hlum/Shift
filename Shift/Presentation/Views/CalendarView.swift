@@ -13,19 +13,36 @@ import SwiftData
 struct CalendarView: View {
     @StateObject var vm: CalendarViewModel
     var body: some View {
+        
         VStack {
-            Button("Add Shift", action: {
-                vm.addShift(Shift(id: "121", name: "Test1", startTime: Date(), endTime: Date()))
-            })
-            ForEach(vm.shifts) { shift in
-                Text(shift.name)
+            FSCalendarView()
+                .frame(maxWidth: .infinity)
+            
+            VStack {
+                selectedDateHeader(selectedDate: Date())
+                Spacer()
             }
+            .frame(maxWidth: .infinity)
+            .frame(height: UIScreen.main.bounds.height * 0.4)
+            
         }
+        
+    }
+    
+    @ViewBuilder
+    func selectedDateHeader(selectedDate: Date) -> some View {
+        Text(selectedDate.formatted(date: .abbreviated, time: .omitted))
+            .padding(.horizontal)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(height: 30)
+            .background(.gray)
+        
     }
 }
 
 
 #Preview {
     CalendarView(vm: CalendarViewModel.preview())
+        .environment(\.locale, Locale(identifier: "ja_JP"))
         .modelContainer(for: Shift.self, inMemory: true)
 }
