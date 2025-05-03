@@ -16,14 +16,18 @@ class ShiftUseCase {
     }
     
     
-    
-    func fetchShifts(descriptor: FetchDescriptor<Shift>) throws -> [Shift] {
-        return try shiftRepository.fetchShifts(descriptor: descriptor)
+    func fetchShifts(
+        descriptor: FetchDescriptor<Shift> = FetchDescriptor<Shift>()
+    ) throws -> [Shift] {
+        return try shiftRepository
+            .fetchShifts(
+                descriptor: descriptor
+            )
     }
     
     
-    func addShift(_ shift: Shift) throws {
-        try shiftRepository.addShift(shift)
+    func addShift(_ shift: Shift) {
+        shiftRepository.addShift(shift)
     }
     
     

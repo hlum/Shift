@@ -8,14 +8,15 @@
 import SwiftUI
 
 struct SettingView: View {
+    @Environment(\.modelContext) var modelContext
     var body: some View {
         Form {
             Section {
                 NavigationLink {
-                    Text("Hello")
+                    let companyUseCase = CompanyUseCase(companyRepository: SwiftDataCompanyRepo(context: modelContext))
+                    CompanyListView(vm: CompanyListViewModel(companyUseCase: companyUseCase))
                 } label: {
                     Text("Company")
-
                 }
             } header: {
                 Text("Company List")

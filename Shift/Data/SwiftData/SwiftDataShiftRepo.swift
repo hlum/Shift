@@ -18,21 +18,12 @@ final class SwiftDataShiftRepo: ShiftRepository {
     
     
     func fetchShifts(descriptor: FetchDescriptor<Shift>) throws -> [Shift] {
-        let shiftObjects = try context.fetch(descriptor)
-        return shiftObjects.map {
-            Shift(
-                id: $0.id,
-                name: $0.name,
-                startTime: $0.startTime,
-                endTime: $0.endTime,
-                company: $0.company
-            )
-        }
+        return try context.fetch(descriptor)
     }
     
     
     
-    func addShift(_ shift: Shift) throws {
+    func addShift(_ shift: Shift) {
         context.insert(shift)
     }
     
@@ -45,6 +36,7 @@ final class SwiftDataShiftRepo: ShiftRepository {
             existing.name = shift.name
             existing.startTime = shift.startTime
             existing.endTime = shift.endTime
+            existing.company = shift.company
         }
     }
 

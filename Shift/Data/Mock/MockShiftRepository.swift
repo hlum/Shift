@@ -18,7 +18,7 @@ final class MockShiftRepository: ShiftRepository {
             company: Company(
                 id: "test2",
                 name: "Test2Company",
-                color: "Black",
+                color: .blue,
                 endDate: Date(),
                 payDay: PayDay(
                     payDay: Date().addingTimeInterval(
@@ -48,7 +48,7 @@ final class MockShiftRepository: ShiftRepository {
             company: Company(
                 id: "test2",
                 name: "Test2Company",
-                color: "Black",
+                color: .blue,
                 endDate: Date(),
                 payDay: PayDay(
                     payDay: Date().addingTimeInterval(
@@ -76,7 +76,7 @@ final class MockShiftRepository: ShiftRepository {
         return shifts
     }
     
-    func addShift(_ shift: Shift) throws {
+    func addShift(_ shift: Shift) {
         shifts.append(shift)
     }
     
