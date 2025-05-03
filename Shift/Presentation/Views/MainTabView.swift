@@ -23,7 +23,15 @@ struct MainTabView: View {
                     Image(systemName: "calendar")
                 }
                 .tag(0)
+            
+            
+            SettingView()
+                .tabItem {
+                    Image(systemName: "gear")
+                }
+                .tag(1)
         }
+
     }
 }
 

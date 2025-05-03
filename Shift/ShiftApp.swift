@@ -12,7 +12,7 @@ import SwiftData
 struct ShiftApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Shift.self,
+            Shift.self,Company.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -32,7 +32,11 @@ struct ShiftApp: App {
             let viewModel = CalendarViewModel(shiftUseCase: useCase)
             
             CalendarView(vm: viewModel)
+                .onAppear {
+                    print(URL.applicationSupportDirectory.path(percentEncoded: false))
+                }
         }
         .modelContainer(sharedModelContainer)
+        
     }
 }
