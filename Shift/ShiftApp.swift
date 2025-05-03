@@ -27,11 +27,7 @@ struct ShiftApp: App {
 
     var body: some Scene {
         WindowGroup {
-            let repository = SwiftDataShiftRepo(context: sharedModelContainer.mainContext)
-            let useCase = ShiftUseCase(shiftRepository: repository)
-            let viewModel = CalendarViewModel(shiftUseCase: useCase)
-            
-            CalendarView(vm: viewModel)
+            MainTabView()
                 .onAppear {
                     print(URL.applicationSupportDirectory.path(percentEncoded: false))
                 }

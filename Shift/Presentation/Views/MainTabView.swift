@@ -10,26 +10,28 @@ import SwiftUI
 struct MainTabView: View {
     @Environment(\.modelContext) var modelContext
     var body: some View {
-        TabView {
-            let calendarViewModel = CalendarViewModel(
-                shiftUseCase: ShiftUseCase(
-                    shiftRepository: SwiftDataShiftRepo(
-                        context: modelContext
+        NavigationStack {
+            TabView {
+                let calendarViewModel = CalendarViewModel(
+                    shiftUseCase: ShiftUseCase(
+                        shiftRepository: SwiftDataShiftRepo(
+                            context: modelContext
+                        )
                     )
                 )
-            )
-            CalendarView(vm: calendarViewModel)
-                .tabItem {
-                    Image(systemName: "calendar")
-                }
-                .tag(0)
-            
-            
-            SettingView()
-                .tabItem {
-                    Image(systemName: "gear")
-                }
-                .tag(1)
+                CalendarView(vm: calendarViewModel)
+                    .tabItem {
+                        Image(systemName: "calendar")
+                    }
+                    .tag(0)
+                
+                
+                SettingView()
+                    .tabItem {
+                        Image(systemName: "gear")
+                    }
+                    .tag(1)
+            }
         }
 
     }
