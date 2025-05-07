@@ -27,4 +27,9 @@ final class CompanyUseCase {
     }
     
     
+    func addCompany(_ company: Company) {
+        companyRepository.addCompany(company)
+    }
+    
+    
 }

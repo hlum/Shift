@@ -14,20 +14,52 @@ final class Company: Identifiable{
     @Attribute(.unique) var id: String = UUID().uuidString
     var name: String
     var color: ColorName
-    var endDate: Date
+    var settleMentDate: SettlementDate
     var payDay: PayDay
     var salary: Salary
     
     @Relationship var shifts: [Shift] = []
     
     
-    init(id: String, name: String, color: ColorName, endDate: Date, payDay: PayDay, salary: Salary) {
+    init(id: String, name: String, color: ColorName, endDate: SettlementDate, payDay: PayDay, salary: Salary) {
         self.id = id
         self.name = name
         self.color = color
-        self.endDate = endDate
+        self.settleMentDate = endDate
         self.payDay = payDay
         self.salary = salary
+    }
+}
+
+enum SettlementDate: Codable, Equatable, Hashable {
+    case day(Int)        // 1 to 30
+    case endOfMonth      // Special case for "end of month"
+    
+    
+    var displayString: String {
+        switch self {
+        case .day(let num): return "\(num)"
+        case .endOfMonth: return "End of Month"
+        }
+    }
+    
+    func toDate(forMonth month: Int, year: Int, calendar: Calendar = .current) -> Date? {
+        var components = DateComponents()
+        components.year = year
+        components.month = month
+        
+        switch self {
+        case .day(let day):
+            components.day = day
+        case .endOfMonth:
+            // Get the last day of the month
+            if let range = calendar.range(of: .day, in: .month, for: calendar.date(from: components)!) {
+                components.day = range.count
+            } else {
+                return nil
+            }
+        }
+        return calendar.date(from: components)
     }
 }
 

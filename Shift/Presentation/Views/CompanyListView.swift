@@ -39,24 +39,22 @@ extension CompanyListViewModel {
 
 struct CompanyListView: View {
     @StateObject var vm: CompanyListViewModel
-    
+    @Environment(\.modelContext) var modelContext
     var body: some View {
         VStack {
             List(vm.companies) { company in
                 NavigationLink {
                     Text("hello")
                 } label: {
-                    HStack {
-                        Text(company.name)
-                        Spacer()
-                        Image(systemName: "greaterthan")
-                    }
-                    .padding(.horizontal)
+                    Text(company.name)
                 }
             }
-            
+        }
+        .overlay(alignment: .bottom, content: {
             NavigationLink {
-                Text("Add new COmpany")
+                let repo = SwiftDataCompanyRepo(context: modelContext)
+                let useCase = CompanyUseCase(companyRepository: repo)
+                AddNewCompanyView(companyUseCase: useCase)
             } label: {
                 Text("Add Company")
                     .font(.headline)
@@ -67,7 +65,7 @@ struct CompanyListView: View {
                     .cornerRadius(10)
                     .padding()
             }
-        }
+        })
         .foregroundStyle(.black)
     }
 }

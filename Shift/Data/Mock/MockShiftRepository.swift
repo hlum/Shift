@@ -19,11 +19,10 @@ final class MockShiftRepository: ShiftRepository {
                 id: "test2",
                 name: "Test2Company",
                 color: .blue,
-                endDate: Date(),
+                endDate: .endOfMonth,
                 payDay: PayDay(
-                    payDay: Date().addingTimeInterval(
-                        86400
-                    ),
+                    payDay: .endOfMonth,
+                    payTiming: .currentMonth,
                     holidayPayDayChange: false,
                     holidayPayEarly: false
                 ) ,
@@ -31,12 +30,12 @@ final class MockShiftRepository: ShiftRepository {
                     baseSalary: 1400,
                     transportationExpense: 360,
                     holidaySalary: 1400,
-                    lateSalary: LateSalary(
-                        salary: 1560,
+                    lateSalary:LateSalary(
+                        lateSalary: 1400,
                         startTime: Date(),
-                        endTime: Date()
-                    ),
-                    overtimeSalary: 1560
+                        endTiem: Date()
+                       ),
+                    paymentType: .oneDay
                 )
             )
         ),
@@ -49,11 +48,10 @@ final class MockShiftRepository: ShiftRepository {
                 id: "test2",
                 name: "Test2Company",
                 color: .blue,
-                endDate: Date(),
+                endDate: .day(10),
                 payDay: PayDay(
-                    payDay: Date().addingTimeInterval(
-                        86400
-                    ),
+                    payDay: .day(15),
+                    payTiming: .nextMonth,
                     holidayPayDayChange: false,
                     holidayPayEarly: false
                 ) ,
@@ -61,12 +59,13 @@ final class MockShiftRepository: ShiftRepository {
                     baseSalary: 1400,
                     transportationExpense: 360,
                     holidaySalary: 1400,
+                    overtimeSalary: OverTimeSetting(baseWorkHours: 8, overtimePayRate: 1400),
                     lateSalary: LateSalary(
-                        salary: 1560,
+                        lateSalary: 1400,
                         startTime: Date(),
-                        endTime: Date()
-                    ),
-                    overtimeSalary: 1560
+                        endTiem: Date()
+                       ),
+                    paymentType: .hourly
                 )
             )
         )

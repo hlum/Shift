@@ -32,7 +32,7 @@ final class SwiftDataCompanyRepo: CompanyRepository {
         if let existing = try context.fetch(descriptor).first {
             existing.name = company.name
             existing.color = company.color
-            existing.endDate = company.endDate
+            existing.settleMentDate = company.settleMentDate
             existing.payDay = company.payDay
             existing.salary = company.salary
         }

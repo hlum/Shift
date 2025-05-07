@@ -16,11 +16,10 @@ final class MockCompanyRepository: CompanyRepository {
            id: "test2",
            name: "Test2Company",
            color: .blue,
-           endDate: Date(),
+           endDate: .endOfMonth,
            payDay: PayDay(
-               payDay: Date().addingTimeInterval(
-                   86400
-               ),
+            payDay: .day(15),
+            payTiming: .nextMonth,
                holidayPayDayChange: false,
                holidayPayEarly: false
            ) ,
@@ -28,22 +27,22 @@ final class MockCompanyRepository: CompanyRepository {
                baseSalary: 1400,
                transportationExpense: 360,
                holidaySalary: 1400,
+               overtimeSalary: OverTimeSetting(baseWorkHours: 8, overtimePayRate: 1400),
                lateSalary: LateSalary(
-                   salary: 1560,
-                   startTime: Date(),
-                   endTime: Date()
+                lateSalary: 1400,
+                startTime: Date(),
+                endTiem: Date()
                ),
-               overtimeSalary: 1560
+               paymentType: .hourly
            )
        ), Company(
         id: "test4",
         name: "Test2Company",
         color: .blue,
-        endDate: Date(),
+        endDate: .endOfMonth,
         payDay: PayDay(
-            payDay: Date().addingTimeInterval(
-                86400
-            ),
+            payDay: .endOfMonth,
+            payTiming: .currentMonth,
             holidayPayDayChange: false,
             holidayPayEarly: false
         ) ,
@@ -51,12 +50,13 @@ final class MockCompanyRepository: CompanyRepository {
             baseSalary: 1400,
             transportationExpense: 360,
             holidaySalary: 1400,
+            overtimeSalary: OverTimeSetting(baseWorkHours: 8, overtimePayRate: 1400),
             lateSalary: LateSalary(
-                salary: 1560,
+                lateSalary: 1400,
                 startTime: Date(),
-                endTime: Date()
-            ),
-            overtimeSalary: 1560
+                endTiem: Date()
+               ),
+            paymentType: .oneDay
         )
     )
     ]
