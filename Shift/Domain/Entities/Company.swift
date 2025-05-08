@@ -11,14 +11,16 @@ import SwiftUI
 
 @Model
 final class Company: Identifiable{
-    @Attribute(.unique) var id: String = UUID().uuidString
+    @Attribute(.unique)
+    var id: String = UUID().uuidString
     var name: String
     var color: ColorName
     var settleMentDate: SettlementDate
     var payDay: PayDay
     var salary: Salary
     
-    @Relationship var shifts: [Shift] = []
+    @Relationship(deleteRule: .cascade)
+    var shifts: [Shift]?
     
     
     init(id: String, name: String, color: ColorName, endDate: SettlementDate, payDay: PayDay, salary: Salary) {

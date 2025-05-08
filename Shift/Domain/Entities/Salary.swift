@@ -13,8 +13,13 @@ final class Salary {
     var baseSalary: Int
     var transportationExpense: Int
     var holidaySalary: Int?
+    
+    @Relationship(deleteRule: .cascade)
     var overtimeSalary: OverTimeSetting?
+    
+    @Relationship(deleteRule: .cascade)
     var lateSalary: LateSalary?
+    
     var paymentTypeRaw: String
 
     var paymentType: PaymentType {

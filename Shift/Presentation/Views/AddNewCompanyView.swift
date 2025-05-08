@@ -28,6 +28,7 @@ final class AddNewCompanyViewModel: ObservableObject {
     @Published var lateSalaryEndTime: Date? = Date()
     @Published var paymentType: PaymentType = .hourly
 
+    @Published var baseWorkHours: Double? = nil
     
     
     @Published var showSettlementDatePicker: Bool = false
@@ -81,7 +82,7 @@ struct AddNewCompanyView: View {
                             showPaymentTypePicker: $vm.showPaymentTypePicker,
                             baseSalary: $vm.baseSalary,
                             transportationExpense: $vm.transportationExpense,
-                            holidaySalary: $vm.holidaySalary,
+                            holidaySalary: $vm.holidaySalary, baseWorkHours: $vm.baseWorkHours,
                             overtimeSalary: $vm.overtimeSalary,
                             lateSalary: $vm.lateSalary,
                             lateSalaryStartTime: $vm.lateSalaryStartTime,
@@ -191,7 +192,10 @@ struct SalarySettingView: View {
     @Binding var baseSalary: Int
     @Binding var transportationExpense: Int
     @Binding var holidaySalary: Int?
+    
+    @Binding var baseWorkHours: Double?
     @Binding var overtimeSalary: Int?
+    
     @Binding var lateSalary:Int?
     @Binding var lateSalaryStartTime: Date?
     @Binding var lateSalaryEndTime: Date?
@@ -259,7 +263,10 @@ struct SalarySettingView: View {
                             Spacer()
                             
                             TextField("Holiday Salary", text: Binding(
-                                get: { holidaySalary != nil ? String("\(holidaySalary!)") : "none" },
+                                get: {
+                                    holidaySalary != nil ? String(holidaySalary!)
+                                    : "None"
+                                },
                                 set: { newValue in
                                     if let intValue = Int(newValue) {
                                         holidaySalary = intValue
@@ -288,14 +295,27 @@ struct SalarySettingView: View {
                                     Text("\(lateSalary != nil ? String("\(lateSalary!)") : "none")")
                                 }
                             }
+                            
+                            
+                            NavigationLink {
+                                Text("")
+                                OverTimeSalaryView(
+                                    baseWorkHours: $baseWorkHours,
+                                    overTimePayRate: $overtimeSalary
+                                )
+                            } label: {
+                                HStack {
+                                    Text("Overtime Salary")
+                                        .foregroundStyle(.gray)
+                                    
+                                    Text("\(overtimeSalary != nil ? String("\(overtimeSalary!)") : "none")")
+                                    
+                                }
+                            }
+
 
                         }
-                        
-                        
-                        
                     }
-                    
-                    
                 }
             }
             
@@ -309,7 +329,7 @@ struct SalarySettingView: View {
 // MARK: LateNightPayView
 
 struct LateNightPayView: View {
-    @State var hasLateNightSalary: Bool = true
+    @State var hasLateNightSalary: Bool = false
     @Binding var lateSalary:Int?
     @Binding var lateSalaryStartTime: Date?
     @Binding var lateSalaryEndTime: Date?
@@ -337,7 +357,7 @@ struct LateNightPayView: View {
                             .foregroundStyle(.gray)
                         Spacer()
                         TextField("Late Night Rate", text:Binding(
-                            get: { lateSalary != nil ? String("\(lateSalary!)") : "none" },
+                            get: { lateSalary != nil ? "\(lateSalary!)" : "none" },
                             set: { newValue in
                                 if let intValue = Int(newValue) {
                                     lateSalary = intValue
@@ -361,6 +381,87 @@ struct LateNightPayView: View {
                     ), displayedComponents: .hourAndMinute)
                 }
             }
+        }
+    }
+}
+
+
+
+struct OverTimeSalaryView: View {
+    @State var hasOverTimeSalary: Bool = true
+    @State var showBaseWorkHourPicker: Bool = true
+    @Binding var baseWorkHours: Double?
+    @Binding var overTimePayRate: Int?
+    var body: some View {
+        ZStack {
+            Form {
+                Toggle("Has overtime salary", isOn: $hasOverTimeSalary)
+                
+                if hasOverTimeSalary {
+                    Section {
+                        Button {
+                            showBaseWorkHourPicker.toggle()
+                        } label: {
+                            HStack {
+                                Text("Applied when")
+                                    .foregroundStyle(.gray)
+                                Text("\(String(format: "%.2f", baseWorkHours ?? 0))h and above")
+                                    .foregroundStyle(.black)
+                            }
+                        }
+                        
+                        
+                        HStack {
+                            Text("Over Time Rate")
+                            TextField("Over Time Rate", text: Binding(
+                                get: { overTimePayRate != nil ? String(overTimePayRate!) : "None" },
+                                set: { newValue in
+                                    if let intValue = Int(newValue) {
+                                        overTimePayRate = intValue
+                                    } else if newValue.isEmpty {
+                                        overTimePayRate = 0
+                                    } else {
+                                        overTimePayRate = 0
+                                    }
+                                }))
+                        }
+                    }
+                }
+            }
+            
+            
+            BaseWorkHourPickerView(selection: $baseWorkHours, isShowing: $showBaseWorkHourPicker)
+                .offset(y: showBaseWorkHourPicker ? 0 : UIScreen.main.bounds.height)
+
+        }
+    }
+}
+// MARK: PaymentType PickerView
+struct BaseWorkHourPickerView: View {
+    @Binding var selection: Double?
+    @Binding var isShowing: Bool
+    var body: some View {
+        VStack {
+            Spacer()
+            Button(action: {
+                self.isShowing = false
+            }) {
+                HStack {
+                    Spacer()
+                    Text("Close")
+                        .padding(.horizontal, 16)
+                }
+            }
+            
+            Picker(selection: $selection, label: Text("")) {
+                ForEach(1...24, id: \.self) {
+                    Text("\($0)h")
+                        .tag(Double($0))
+                }
+            }
+            .pickerStyle(.wheel)
+            .frame(width: 200)
+            .labelsHidden()
         }
     }
 }
@@ -546,9 +647,14 @@ struct SettlementDatePickerView: View {
 }
 
 
-#Preview {
-    LateNightPayView(lateSalary: .constant(1000), lateSalaryStartTime: .constant(nil), lateSalaryEndTime: .constant(nil))
-}
+//#Preview {
+//    LateNightPayView(lateSalary: .constant(1000), lateSalaryStartTime: .constant(nil), lateSalaryEndTime: .constant(nil))
+//}
+
+
+//#Preview {
+//    OverTimeSalaryView(baseWorkHours: .constant(8), overTimePayRate: .constant(1400))
+//}
 
 #Preview {
     NavigationStack {

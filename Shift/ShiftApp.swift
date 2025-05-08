@@ -12,7 +12,7 @@ import SwiftData
 struct ShiftApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Shift.self,Company.self
+           Company.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
