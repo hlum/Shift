@@ -24,7 +24,7 @@ final class SwiftDataShiftRepo: ShiftRepository {
     
     
     func addShift(_ shift: Shift) {
-        context.insert(shift)
+        shift.company.shifts?.append(shift)
     }
     
     

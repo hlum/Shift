@@ -15,7 +15,6 @@ final class CompanyListViewModel: ObservableObject {
     
     init(companyUseCase: CompanyUseCase) {
         self.companyUseCase = companyUseCase
-        fetchCompanies()
     }
     
     func fetchCompanies() {
@@ -44,11 +43,18 @@ struct CompanyListView: View {
         VStack {
             List(vm.companies) { company in
                 NavigationLink {
-                    Text("hello")
+                    Text(company.name)
+                    Text(company.color.rawValue)
+                    Text(company.payDay.payDay.displayString)
+                    Text(company.salary.baseSalary.description)
+                    Text(company.salary.overtimeSalary?.overtimePayRate.description ?? "")
                 } label: {
                     Text(company.name)
                 }
             }
+        }
+        .onAppear {
+            vm.fetchCompanies()
         }
         .overlay(alignment: .bottom, content: {
             NavigationLink {

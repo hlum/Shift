@@ -20,16 +20,16 @@ final class Company: Identifiable{
     var salary: Salary
     
     @Relationship(deleteRule: .cascade)
-    var shifts: [Shift]?
+    var shifts: [Shift] = []
     
     
-    init(id: String, name: String, color: ColorName, endDate: SettlementDate, payDay: PayDay, salary: Salary) {
-        self.id = id
+    init(name: String, color: ColorName, endDate: SettlementDate, payDay: PayDay, salary: Salary, shifts: [Shift] = []) {
         self.name = name
         self.color = color
         self.settleMentDate = endDate
         self.payDay = payDay
         self.salary = salary
+        self.shifts = shifts
     }
 }
 

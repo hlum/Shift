@@ -65,11 +65,11 @@ enum PaymentType: String, Codable, CaseIterable {
 class LateSalary {
     var lateSalary: Int?
     var startTime: Date?
-    var endTiem: Date?
+    var endTime: Date?
     
-    init(lateSalary: Int? = nil, startTime: Date? = nil, endTiem: Date? = nil) {
+    init(lateSalary: Int? = nil, startTime: Date? = nil, endTime: Date? = nil) {
         self.lateSalary = lateSalary
         self.startTime = startTime
-        self.endTiem = endTiem
+        self.endTime = endTime
     }
 }

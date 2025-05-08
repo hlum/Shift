@@ -13,7 +13,6 @@ final class MockCompanyRepository: CompanyRepository {
     
     private var companies: [Company] = [
         Company(
-           id: "test2",
            name: "Test2Company",
            color: .blue,
            endDate: .endOfMonth,
@@ -31,12 +30,11 @@ final class MockCompanyRepository: CompanyRepository {
                lateSalary: LateSalary(
                 lateSalary: 1400,
                 startTime: Date(),
-                endTiem: Date()
+                endTime: Date()
                ),
                paymentType: .hourly
            )
        ), Company(
-        id: "test4",
         name: "Test2Company",
         color: .blue,
         endDate: .endOfMonth,
@@ -54,7 +52,7 @@ final class MockCompanyRepository: CompanyRepository {
             lateSalary: LateSalary(
                 lateSalary: 1400,
                 startTime: Date(),
-                endTiem: Date()
+                endTime: Date()
                ),
             paymentType: .oneDay
         )

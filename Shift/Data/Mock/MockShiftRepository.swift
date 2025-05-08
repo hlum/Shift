@@ -16,7 +16,6 @@ final class MockShiftRepository: ShiftRepository {
             startTime: Date(),
             endTime: Date(),
             company: Company(
-                id: "test2",
                 name: "Test2Company",
                 color: .blue,
                 endDate: .endOfMonth,
@@ -33,7 +32,7 @@ final class MockShiftRepository: ShiftRepository {
                     lateSalary:LateSalary(
                         lateSalary: 1400,
                         startTime: Date(),
-                        endTiem: Date()
+                        endTime: Date()
                        ),
                     paymentType: .oneDay
                 )
@@ -45,7 +44,6 @@ final class MockShiftRepository: ShiftRepository {
             startTime: Date(),
             endTime: Date(),
             company: Company(
-                id: "test2",
                 name: "Test2Company",
                 color: .blue,
                 endDate: .day(10),
@@ -63,7 +61,7 @@ final class MockShiftRepository: ShiftRepository {
                     lateSalary: LateSalary(
                         lateSalary: 1400,
                         startTime: Date(),
-                        endTiem: Date()
+                        endTime: Date()
                        ),
                     paymentType: .hourly
                 )

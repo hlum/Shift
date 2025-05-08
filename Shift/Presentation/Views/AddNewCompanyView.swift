@@ -43,15 +43,51 @@ final class AddNewCompanyViewModel: ObservableObject {
     
     
     func addNewCompany() {
-        let mockUseCase = CompanyUseCase(companyRepository:MockCompanyRepository())
-        let company = mockUseCase.getCompanies().first!
+        guard !companyName.isEmpty else {
+            // Show alert
+            return
+        }
         
-        companyUseCase.addCompany(company)
+        
+        
+        
+        
+        let salary = Salary(
+            baseSalary: baseSalary,
+            transportationExpense: transportationExpense,
+            holidaySalary: holidaySalary,
+            overtimeSalary: baseWorkHours == nil && overtimeSalary == nil ? nil : OverTimeSetting(
+                baseWorkHours: baseWorkHours!,
+                overtimePayRate: overtimeSalary!
+            ),
+            lateSalary: LateSalary(
+                lateSalary: lateSalary,
+                startTime: lateSalaryStartTime,
+                endTime: lateSalaryEndTime
+            ),
+            paymentType: paymentType
+        )
+        let newCompany = Company(
+            name: companyName,
+            color: selectedColor,
+            endDate: settlementDate,
+            payDay: PayDay(
+                payDay: payDay,
+                payTiming: payTiming,
+                holidayPayDayChange: holidayPayDayChange,
+                holidayPayEarly: holidayPayEarly
+            ),
+            salary: salary
+        )
+        
+        companyUseCase.addCompany(newCompany)
     }
 }
 
+// MARK: AddNewCompanyView
 struct AddNewCompanyView: View {
     @StateObject private var vm: AddNewCompanyViewModel
+    @Environment(\.dismiss) var dismiss
     
     init(companyUseCase: CompanyUseCase) {
         _vm = StateObject(wrappedValue: AddNewCompanyViewModel(companyUseCase: companyUseCase))
@@ -92,19 +128,33 @@ struct AddNewCompanyView: View {
                     } label: {
                         HStack {
                             Text("Base salary").foregroundStyle(.gray)
-                            Text(vm.payTiming.displayString)
-                            Text(vm.payDay.displayString)
+                            Text("\(vm.baseSalary)")
                         }
                     }
 
                 }
             }
-            
-            SettlementDatePickerView(selection: $vm.settlementDate, isShowing: $vm.showSettlementDatePicker)
-                .offset(y: vm.showSettlementDatePicker ? 0 : UIScreen.main.bounds.height)
-            
-        
         }
+        .overlay(alignment: .bottom, content: {
+                Button {
+                    vm.addNewCompany()
+                    dismiss.callAsFunction()
+                } label: {
+                    Text("Add New Company")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 55)
+                        .background(.blue)
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+                        .foregroundStyle(.white)
+                }
+                
+                
+                if vm.showSettlementDatePicker {
+                    SettlementDatePickerView(selection: $vm.settlementDate, isShowing: $vm.showSettlementDatePicker)
+                }
+        })
         .foregroundStyle(.black)
         .navigationTitle("Payment date")
         .navigationBarTitleDisplayMode(.inline)
@@ -126,7 +176,6 @@ extension AddNewCompanyView {
             }
         }
     }
-    
     
     private var payDaySelection: some View {
         NavigationLink {
@@ -271,9 +320,9 @@ struct SalarySettingView: View {
                                     if let intValue = Int(newValue) {
                                         holidaySalary = intValue
                                     } else if newValue.isEmpty {
-                                        holidaySalary = 0
+                                        holidaySalary = nil
                                     } else {
-                                        holidaySalary = 0
+                                        holidaySalary = nil
                                     }
                                 }
                             ))
@@ -327,7 +376,6 @@ struct SalarySettingView: View {
 
 
 // MARK: LateNightPayView
-
 struct LateNightPayView: View {
     @State var hasLateNightSalary: Bool = false
     @Binding var lateSalary:Int?
@@ -362,9 +410,9 @@ struct LateNightPayView: View {
                                 if let intValue = Int(newValue) {
                                     lateSalary = intValue
                                 } else if newValue.isEmpty {
-                                    lateSalary = 0
+                                    lateSalary = nil
                                 } else {
-                                    lateSalary = 0
+                                    lateSalary = nil
                                 }
                             }))
                         .keyboardType(.decimalPad)
@@ -372,7 +420,9 @@ struct LateNightPayView: View {
                     
                     DatePicker("Start Time", selection: Binding(
                         get: { lateSalaryStartTime ?? Date() },
-                        set: { newValue in lateSalaryStartTime = newValue }
+                        set: { newValue in
+                            lateSalaryStartTime = newValue
+                        }
                     ), displayedComponents: .hourAndMinute)
                     
                     DatePicker("End Time", selection: Binding(
@@ -386,16 +436,26 @@ struct LateNightPayView: View {
 }
 
 
-
+// MARK: OverTimeSalaryView
 struct OverTimeSalaryView: View {
-    @State var hasOverTimeSalary: Bool = true
-    @State var showBaseWorkHourPicker: Bool = true
+    @State var hasOverTimeSalary: Bool = false
+    @State var showBaseWorkHourPicker: Bool = false
     @Binding var baseWorkHours: Double?
     @Binding var overTimePayRate: Int?
     var body: some View {
         ZStack {
             Form {
-                Toggle("Has overtime salary", isOn: $hasOverTimeSalary)
+                Toggle("Has overtime salary", isOn: Binding(
+                    get:{ hasOverTimeSalary } ,
+                    set: { newValue in
+                        
+                        if !newValue {
+                            baseWorkHours = nil
+                            overTimePayRate = nil
+                        }
+                        hasOverTimeSalary = newValue
+                        
+                    }))
                 
                 if hasOverTimeSalary {
                     Section {
@@ -436,6 +496,7 @@ struct OverTimeSalaryView: View {
         }
     }
 }
+
 // MARK: PaymentType PickerView
 struct BaseWorkHourPickerView: View {
     @Binding var selection: Double?
