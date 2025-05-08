@@ -24,7 +24,8 @@ final class SwiftDataShiftRepo: ShiftRepository {
     
     
     func addShift(_ shift: Shift) {
-        shift.company.shifts?.append(shift)
+        shift.company.shifts.append(shift)
+        context.insert(shift)
     }
     
     
@@ -36,16 +37,29 @@ final class SwiftDataShiftRepo: ShiftRepository {
             existing.name = shift.name
             existing.startTime = shift.startTime
             existing.endTime = shift.endTime
-            existing.company = shift.company
+            
+            // If the company changed
+            if existing.company.id != shift.company.id {
+                // Remove from old company's shifts
+                if let index = existing.company.shifts.firstIndex(where: { $0.id == existing.id }) {
+                    existing.company.shifts.remove(at: index)
+                }
+                // Add to new company's shifts
+                shift.company.shifts.append(existing)
+                existing.company = shift.company
+            }
         }
     }
 
 
     
     func deleteShift(_ shift: Shift) throws {
+        // Remove from company's shifts array
+        if let index = shift.company.shifts.firstIndex(where: { $0.id == shift.id }) {
+            shift.company.shifts.remove(at: index)
+        }
         context.delete(shift)
     }
- 
     
     
 }
