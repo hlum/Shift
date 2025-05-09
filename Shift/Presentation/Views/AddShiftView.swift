@@ -21,6 +21,10 @@ final class AddShiftViewModel: ObservableObject {
     @Published var showAlert: Bool = false
     
     
+    @Published var shouldFocusTitleTextField: Bool = false
+    
+    
+    
     init(shiftUseCase: ShiftUseCase) {
         self.shiftUseCase = shiftUseCase
     }
@@ -36,6 +40,7 @@ final class AddShiftViewModel: ObservableObject {
         guard !title.isEmpty else {
             // Show Alert
             errorMessage = "Title is required"
+            shouldFocusTitleTextField = true
             return false
         }
         
@@ -56,6 +61,9 @@ struct AddShiftView: View {
     @StateObject var vm: AddShiftViewModel
     @Environment(\.dismiss) private var dismiss
     @Binding var selectedDate: Date
+    
+    @FocusState var titleTextFieldIsFocused: Bool
+
     
     // Reference date (e.g., midnight)
     let referenceDate = Calendar.current.startOfDay(for: Date())
@@ -87,6 +95,7 @@ struct AddShiftView: View {
                     
                     
                     TextField("Title", text: $vm.title)
+                        .focused($titleTextFieldIsFocused)
                 }
                 
                 
@@ -99,6 +108,9 @@ struct AddShiftView: View {
                 }
                 
             }
+            .onChange(of: vm.shouldFocusTitleTextField, { _, newValue in
+                titleTextFieldIsFocused = newValue
+            })
             .alert(isPresented: $vm.showAlert) {
                 Alert(title: Text("Do you want to close this window?"), message: Text("If you close this window, it will be lost."),
                       primaryButton: .destructive(Text("OK"),action: {
