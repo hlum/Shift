@@ -11,9 +11,8 @@ import SwiftData
 final class MockShiftRepository: ShiftRepository {
     var shifts: [Shift] = [
         .init(
-            id: UUID().uuidString,
             name: "Test1",
-            startTime: Date(),
+            startTime: Date(), breakDuration: 10,
             endTime: Date(),
             company: Company(
                 name: "Test2Company",
@@ -39,9 +38,8 @@ final class MockShiftRepository: ShiftRepository {
             )
         ),
         .init(
-            id: UUID().uuidString,
             name: "Test2",
-            startTime: Date(),
+            startTime: Date(), breakDuration: 1,
             endTime: Date(),
             company: Company(
                 name: "Test2Company",
@@ -73,7 +71,7 @@ final class MockShiftRepository: ShiftRepository {
         return shifts
     }
     
-    func addShift(_ shift: Shift) {
+    func addShift(_ shift: Shift) throws {
         shifts.append(shift)
     }
     

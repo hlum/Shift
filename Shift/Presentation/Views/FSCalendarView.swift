@@ -12,6 +12,7 @@ import SwiftData
 
 struct FSCalendarView: UIViewRepresentable {
     @Binding var selectedDate: Date
+    @Binding var shifts: [Shift]
     @Environment(\.modelContext) private var modelContext
 
 
@@ -19,7 +20,7 @@ struct FSCalendarView: UIViewRepresentable {
         let fsCalendar = FSCalendar()
         fsCalendar.delegate = context.coordinator
         fsCalendar.dataSource = context.coordinator
-        
+        context.coordinator.calendar = fsCalendar
         
         
         fsCalendar.scrollDirection = .vertical
@@ -48,14 +49,15 @@ struct FSCalendarView: UIViewRepresentable {
     
     
     func updateUIView(_ uiView: UIViewType, context: Context) {
-        
+        guard let fsCalendar = uiView as? FSCalendar else { return }
+        fsCalendar.reloadData()
     }
     
     
     
     
     class Coordinator: NSObject, FSCalendarDelegate, FSCalendarDataSource {
-        
+        weak var calendar: FSCalendar?
         var parent: FSCalendarView
         var shiftUseCase: ShiftUseCase
 
@@ -91,9 +93,6 @@ struct FSCalendarView: UIViewRepresentable {
                 return 0
             }
         }
-
-        
-        
         
     }
 }

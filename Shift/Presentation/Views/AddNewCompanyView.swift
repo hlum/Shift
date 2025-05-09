@@ -49,9 +49,6 @@ final class AddNewCompanyViewModel: ObservableObject {
         }
         
         
-        
-        
-        
         let salary = Salary(
             baseSalary: baseSalary,
             transportationExpense: transportationExpense,

@@ -26,8 +26,8 @@ class ShiftUseCase {
     }
     
     
-    func addShift(_ shift: Shift) {
-        shiftRepository.addShift(shift)
+    func addShift(_ shift: Shift) throws {
+        try shiftRepository.addShift(shift)
     }
     
     

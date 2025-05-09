@@ -23,9 +23,10 @@ final class SwiftDataShiftRepo: ShiftRepository {
     
     
     
-    func addShift(_ shift: Shift) {
+    func addShift(_ shift: Shift) throws {
         shift.company.shifts.append(shift)
         context.insert(shift)
+        try context.save()
     }
     
     
@@ -49,6 +50,7 @@ final class SwiftDataShiftRepo: ShiftRepository {
                 existing.company = shift.company
             }
         }
+        try context.save()
     }
 
 
@@ -59,6 +61,7 @@ final class SwiftDataShiftRepo: ShiftRepository {
             shift.company.shifts.remove(at: index)
         }
         context.delete(shift)
+        try context.save()
     }
     
     
