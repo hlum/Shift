@@ -133,19 +133,30 @@ struct AddNewCompanyView: View {
             }
         }
         .overlay(alignment: .bottom, content: {
-                Button {
-                    vm.addNewCompany()
-                    dismiss.callAsFunction()
-                } label: {
-                    Text("Add New Company")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 55)
-                        .background(.blue)
-                        .cornerRadius(10)
-                        .padding(.horizontal)
-                        .foregroundStyle(.white)
+                HStack {
+                    Button {
+                        dismiss.callAsFunction()
+                    } label: {
+                        Text("Cancel")
+                            .font(.headline)
+                            .foregroundStyle(.red)
+                            .padding(10)
+                    }
+                    
+                    Button {
+                        vm.addNewCompany()
+                        dismiss.callAsFunction()
+                    } label: {
+                        Text("Add New Company")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 55)
+                            .background(.blue)
+                            .cornerRadius(10)
+                            .foregroundStyle(.white)
+                    }
                 }
+                .padding(.horizontal)
                 
                 
                 if vm.showSettlementDatePicker {

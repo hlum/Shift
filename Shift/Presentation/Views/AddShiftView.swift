@@ -129,8 +129,8 @@ struct AddShiftView: View {
                             .foregroundStyle(.red)
                             .padding(.horizontal)
                     }
-
-
+                    
+                    
                     Button {
                         let shiftAdded = vm.addShift()
                         if shiftAdded {
@@ -145,7 +145,7 @@ struct AddShiftView: View {
                             .frame(height: 55)
                             .background(.blue)
                             .cornerRadius(10)
-                            
+                        
                     }
                 }
                 .padding(.horizontal)
@@ -156,11 +156,21 @@ struct AddShiftView: View {
 
 
 struct CompanySelectionView: View {
+    @State private var showAddCompany = false
+
     @Binding var selectedCompany: Company?
     @Environment(\.modelContext) private var modelContext
     @State private var companies: [Company] = []
+    
+    var addCompanyDestination: AddNewCompanyView {
+        let repo = SwiftDataCompanyRepo(context: modelContext)
+        let useCase = CompanyUseCase(companyRepository: repo)
+        return AddNewCompanyView(companyUseCase: useCase)
+    }
+    
     var body: some View {
         VStack {
+            
             List(companies) { company in
                 Button {
                     selectedCompany = company
@@ -176,7 +186,25 @@ struct CompanySelectionView: View {
                     .foregroundStyle(.black)
                 }
             }
+            
+            Button {
+                showAddCompany.toggle()
+            } label: {
+                Text("Add Company")
+                    .foregroundStyle(.white)
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 55)
+                    .background(.blue)
+                    .cornerRadius(10)
+                    .padding(10)
+            }
+
         }
+        .fullScreenCover(isPresented: $showAddCompany, content: {
+            addCompanyDestination
+        })
+    
         .navigationTitle("Select Company")
         .onAppear {
             fetchCompanies()
