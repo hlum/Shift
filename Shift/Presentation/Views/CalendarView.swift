@@ -18,7 +18,7 @@ struct CalendarView: View {
         VStack {
             FSCalendarView(
                 selectedDate: $vm.selectedDate,
-                shifts: $vm.shifts
+                needToUpdateUI: $vm.needToUpdateUI
             )
             .frame(maxWidth: .infinity)
 
@@ -65,11 +65,12 @@ struct CalendarView: View {
         .fullScreenCover(isPresented: $vm.showAddShiftView) {
             // On Dismiss
             vm.fetchShifts(for: vm.selectedDate)
+            vm.updateUI()
         } content: {
 //#error("Start from here...")
             let repo = SwiftDataShiftRepo(context: modelContext)
             let useCase = ShiftUseCase(shiftRepository: repo)
-            AddShiftView(vm: .init(shiftUseCase: useCase))
+            AddShiftView(vm: .init(shiftUseCase: useCase), selectedDate: $vm.selectedDate)
         }
 
         

@@ -12,7 +12,7 @@ import SwiftData
 
 struct FSCalendarView: UIViewRepresentable {
     @Binding var selectedDate: Date
-    @Binding var shifts: [Shift]
+    @Binding var needToUpdateUI: Bool
     @Environment(\.modelContext) private var modelContext
 
 
@@ -50,7 +50,12 @@ struct FSCalendarView: UIViewRepresentable {
     
     func updateUIView(_ uiView: UIViewType, context: Context) {
         guard let fsCalendar = uiView as? FSCalendar else { return }
-        fsCalendar.reloadData()
+        if needToUpdateUI {
+            fsCalendar.reloadData()
+            DispatchQueue.main.async {
+                needToUpdateUI = false
+            }
+        }
     }
     
     

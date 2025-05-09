@@ -55,6 +55,7 @@ final class AddShiftViewModel: ObservableObject {
 struct AddShiftView: View {
     @StateObject var vm: AddShiftViewModel
     @Environment(\.dismiss) private var dismiss
+    @Binding var selectedDate: Date
     
     // Reference date (e.g., midnight)
     let referenceDate = Calendar.current.startOfDay(for: Date())
@@ -122,6 +123,7 @@ struct AddShiftView: View {
                         let shiftAdded = vm.addShift()
                         if shiftAdded {
                             dismiss.callAsFunction()
+                            selectedDate = vm.startTime
                         }
                     } label: {
                         Text("Add Shift")
@@ -187,5 +189,5 @@ struct CompanySelectionView: View {
     let repo = MockShiftRepository()
     let useCase = ShiftUseCase(shiftRepository: repo)
     
-    AddShiftView(vm: .init(shiftUseCase: useCase))
+    AddShiftView(vm: .init(shiftUseCase: useCase), selectedDate: .constant(Date()))
 }

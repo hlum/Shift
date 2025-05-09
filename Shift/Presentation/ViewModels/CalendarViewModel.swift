@@ -15,6 +15,8 @@ final class CalendarViewModel: ObservableObject {
     
     @Published var showAddShiftView: Bool = false
     
+    @Published var needToUpdateUI: Bool = false
+    
     private let shiftUseCase: ShiftUseCase
     
     init(shiftUseCase: ShiftUseCase) {
@@ -62,8 +64,15 @@ final class CalendarViewModel: ObservableObject {
         do {
             try shiftUseCase.deleteShift(shift)
             fetchShifts(for: selectedDate)
+            updateUI()
         } catch {
             print("Error deleting shift: \(error.localizedDescription)")
+        }
+    }
+    
+    func updateUI() {
+        DispatchQueue.main.async {
+            self.needToUpdateUI = true
         }
     }
     
