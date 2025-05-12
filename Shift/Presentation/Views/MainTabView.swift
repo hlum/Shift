@@ -26,11 +26,19 @@ struct MainTabView: View {
                     .tag(0)
                 
                 
+                let salaryViewModel = SalaryViewModel(shiftUseCase: ShiftUseCase(shiftRepository: SwiftDataShiftRepo(context: modelContext)))
+                
+                SalaryView(vm: salaryViewModel)
+                    .tabItem {
+                        Image(systemName: "dollarsign")
+                    }
+                    .tag(1)
+                
                 SettingView()
                     .tabItem {
                         Image(systemName: "gear")
                     }
-                    .tag(1)
+                    .tag(2)
             }
         }
 

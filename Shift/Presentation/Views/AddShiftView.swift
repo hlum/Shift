@@ -202,7 +202,9 @@ struct CompanySelectionView: View {
 
         }
         .fullScreenCover(isPresented: $showAddCompany, content: {
-            addCompanyDestination
+            NavigationStack {
+                addCompanyDestination
+            }
         })
     
         .navigationTitle("Select Company")

@@ -23,61 +23,87 @@ final class AddNewCompanyViewModel: ObservableObject {
     @Published var transportationExpense: Int = 0
     @Published var holidaySalary: Int? = nil
     @Published var overtimeSalary: Int? = nil
-    @Published var lateSalary:Int? = nil
+    @Published var lateSalary: Int? = nil
     @Published var lateSalaryStartTime: Date? = Date()
     @Published var lateSalaryEndTime: Date? = Date()
     @Published var paymentType: PaymentType = .hourly
-
     @Published var baseWorkHours: Double? = nil
-    
     
     @Published var showSettlementDatePicker: Bool = false
     @Published var showPayDayPicker: Bool = false
     @Published var showPaymentTypePicker: Bool = false
     
+    @Published var error: Error?
+    @Published var isLoading: Bool = false
     
     init(companyUseCase: CompanyUseCase) {
         self.companyUseCase = companyUseCase
     }
     
-    
+    var isValid: Bool {
+        !companyName.isEmpty &&
+        baseSalary > 0 &&
+        transportationExpense >= 0 &&
+        (paymentType == .oneDay || baseWorkHours != nil) &&
+        (lateSalary == nil || (lateSalaryStartTime != nil && lateSalaryEndTime != nil))
+    }
     
     func addNewCompany() {
-        guard !companyName.isEmpty else {
-            // Show alert
+        guard isValid else {
+            error = ValidationError.invalidInput
             return
         }
         
+        isLoading = true
+        error = nil
         
-        let salary = Salary(
-            baseSalary: baseSalary,
-            transportationExpense: transportationExpense,
-            holidaySalary: holidaySalary,
-            overtimeSalary: baseWorkHours == nil && overtimeSalary == nil ? nil : OverTimeSetting(
-                baseWorkHours: baseWorkHours!,
-                overtimePayRate: overtimeSalary!
-            ),
-            lateSalary: LateSalary(
-                lateSalary: lateSalary,
-                startTime: lateSalaryStartTime,
-                endTime: lateSalaryEndTime
-            ),
-            paymentType: paymentType
-        )
-        let newCompany = Company(
-            name: companyName,
-            color: selectedColor,
-            endDate: settlementDate,
-            payDay: PayDay(
-                payDay: payDay,
-                payTiming: payTiming,
-                holidayPayDayChange: holidayPayDayChange,
-                holidayPayEarly: holidayPayEarly
-            ),
-            salary: salary
-        )
-        
-        companyUseCase.addCompany(newCompany)
+        do {
+            let salary = Salary(
+                baseSalary: baseSalary,
+                transportationExpense: transportationExpense,
+                holidaySalary: holidaySalary,
+                overtimeSalary: baseWorkHours == nil && overtimeSalary == nil ? nil : OverTimeSetting(
+                    baseWorkHours: baseWorkHours!,
+                    overtimePayRate: overtimeSalary!
+                ),
+                lateSalary: LateSalary(
+                    lateSalary: lateSalary,
+                    startTime: lateSalaryStartTime,
+                    endTime: lateSalaryEndTime
+                ),
+                paymentType: paymentType
+            )
+            
+            let newCompany = Company(
+                name: companyName,
+                color: selectedColor,
+                endDate: settlementDate,
+                payDay: PayDay(
+                    payDay: payDay,
+                    payTiming: payTiming,
+                    holidayPayDayChange: holidayPayDayChange,
+                    holidayPayEarly: holidayPayEarly
+                ),
+                salary: salary
+            )
+            
+            companyUseCase.addCompany(newCompany)
+            isLoading = false
+        } catch {
+            self.error = error
+            isLoading = false
+        }
+    }
+}
+
+enum ValidationError: LocalizedError {
+    case invalidInput
+    
+    var errorDescription: String? {
+        switch self {
+        case .invalidInput:
+            return "Please check your input values. All required fields must be filled correctly."
+        }
     }
 }
 
