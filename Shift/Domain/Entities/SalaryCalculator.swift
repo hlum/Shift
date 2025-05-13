@@ -71,9 +71,10 @@ final class SalaryCalculator {
         debug(for: debugShift, "totalSalary after overtimePay: \(totalSalary)")
         
         // Calculate late night salary
-        let lateNightSalary = calculateLateNightSalary(
+        let lateNightSalary = calculateLateNightBonus(
             shiftStart: roundedStartTime,
-            shiftEnd: roundedEndTime
+            shiftEnd: roundedEndTime,
+            baseRate: baseRate
         )
         debug(for: debugShift, "lateNightPay: \(lateNightSalary)")
 
@@ -100,7 +101,7 @@ final class SalaryCalculator {
     
     
     
-    private func calculateLateNightSalary(shiftStart: Date, shiftEnd: Date) -> Double {
+    private func calculateLateNightBonus(shiftStart: Date, shiftEnd: Date, baseRate: Double) -> Double {
         guard let lateSalary = company.salary.lateSalary,
               let lateAmount = lateSalary.lateSalary,
               let lateStart = lateSalary.startTime,
@@ -117,8 +118,10 @@ final class SalaryCalculator {
             lateStart: lateStartTime,
             lateEnd: lateEndTime
         )
+        
+        let lateNightRate = Double(lateAmount) - baseRate
 
-        return Double(lateAmount) * lateNightHours
+        return Double(lateNightRate) * lateNightHours
     }
     
     
