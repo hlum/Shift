@@ -112,31 +112,11 @@ extension Shift {
         debug(for: debugShift, "totalSalary: \(totalSalary)")
         
         // Handle overtime if applicable
-        if let overtimeRate = company.salary.overtimeSalary,
-           hoursWorked > overtimeRate.baseWorkHours {
-            
-            debug(for: debugShift, "overtimeRate: \(overtimeRate)")
-            debug(for: debugShift, "hoursWorked: \(hoursWorked)")
-            debug(for: debugShift, "baseWorkHours : \(overtimeRate.baseWorkHours )")
-            
-            
-            
-            let overtimeHours = hoursWorked - overtimeRate.baseWorkHours
-            
-            debug(for: debugShift, "overtimeHours: \(overtimeHours)")
-            
-            // Calculate overtime pay as the difference between overtime rate and base rate
-            let overtimePayRate = Double(overtimeRate.overtimePayRate) - baseRate
-            
-            debug(for: debugShift, "overtimePayRate: \(overtimePayRate)")
-            
-            let overtimePay = overtimePayRate * overtimeHours
-            debug(for: debugShift, "overtimePay: \(overtimePay)")
-            
-            totalSalary += overtimePay
-            debug(for: debugShift, "after overtimePay totalSalary: \(totalSalary)")
-            
-        }
+        let overtimePay = getOvertimeRate(rate: company.salary.overtimeSalary, hoursWorked: hoursWorked, baseRate: baseRate)
+        
+        totalSalary += overtimePay
+        
+        
         
         // Add late salary if applicable
         if let lateSalary = company.salary.lateSalary {
@@ -164,6 +144,22 @@ extension Shift {
         let calendar = Calendar.current
         return calendar.component(.hour, from: date) * 60 + calendar.component(.minute, from: date)
     }
+    
+    
+    func getOvertimeRate(rate: OverTimeSetting?, hoursWorked: Double, baseRate: Double) -> Double {
+        guard let rate else { return 0.0 }
+        
+        if hoursWorked <= rate.baseWorkHours { return 0.0 }
+        
+        let overtimeHours = hoursWorked - rate.baseWorkHours
+        debug(for: "Fa", "Overtime Hours : \(overtimeHours)")
+        let overtimePayRate = Double(rate.overtimePayRate) - baseRate
+        
+        let overtimePay = overtimePayRate * overtimeHours
+        
+        return overtimePay
+    }
+    
     
     func calculateLateNightHours(shiftStart: Date, shiftEnd: Date, lateStart: Time, lateEnd: Time) -> Double {
         let calendar = Calendar.current
@@ -211,6 +207,7 @@ extension Shift {
         
         return totalLateHours
     }
+    
     
     private func calculateLateNightSalary(shiftStart: Date, shiftEnd: Date, lateSalary: LateSalary) -> Double {
         guard let lateAmount = lateSalary.lateSalary else { return 0 }
