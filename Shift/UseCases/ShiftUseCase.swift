@@ -40,3 +40,10 @@ class ShiftUseCase {
         try shiftRepository.deleteShift(shift)
     }
 }
+
+
+class MockShiftUseCase: ShiftUseCase {
+    init() {
+        super.init(shiftRepository: MockShiftRepository())
+    }
+}

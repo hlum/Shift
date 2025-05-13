@@ -69,20 +69,20 @@ final class SalaryViewModel: ObservableObject {
     }
 }
 
+@MainActor
 struct SalaryView: View {
     @StateObject var vm: SalaryViewModel
     @Environment(\.locale) private var locale
     
+    init(shiftUseCase: ShiftUseCase = MockShiftUseCase()) {
+        _vm = StateObject(wrappedValue: SalaryViewModel(shiftUseCase: shiftUseCase))
+    }
     
     var body: some View {
-        
         VStack {
             title()
             Spacer()
             
-//            ForEach(vm.shifts) { shift in
-//                Text(shift.name)
-//            }
             HStack {
                 Image(systemName: "lessthan.circle")
                     .onTapGesture {
@@ -104,23 +104,18 @@ struct SalaryView: View {
             }
             
             Spacer()
-
-            
-            
         }
-
         .onAppear {
             vm.fetchShifts()
         }
     }
-    
     
     func title() -> some View {
         let formatter = DateFormatter()
         formatter.locale = locale
         formatter.dateFormat = "M/yyyy"
         let dateString = formatter.string(from: vm.selectedDate)
-        return HStack{
+        return HStack {
             Text(dateString)
         }
         .frame(maxWidth: .infinity)
@@ -132,8 +127,9 @@ struct SalaryView: View {
 
 #Preview {
     NavigationStack {
-        let repo = MockShiftRepository()
-        let useCase = ShiftUseCase(shiftRepository: repo)
-        SalaryView(vm: .init(shiftUseCase: useCase))
+        SalaryView()
+            .injectDependencies(DependencyContainer(
+                modelContainer: try! ModelContainer(for: Schema([Company.self, Shift.self]))
+            ))
     }
 }

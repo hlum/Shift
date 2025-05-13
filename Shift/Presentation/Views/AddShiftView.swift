@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 final class AddShiftViewModel: ObservableObject {
     private let shiftUseCase: ShiftUseCase
@@ -64,6 +65,10 @@ struct AddShiftView: View {
     
     @FocusState var titleTextFieldIsFocused: Bool
 
+    init(shiftUseCase: ShiftUseCase = MockShiftUseCase(), selectedDate: Binding<Date>) {
+        _vm = .init(wrappedValue: .init(shiftUseCase: shiftUseCase))
+        _selectedDate = selectedDate
+    }
     
     // Reference date (e.g., midnight)
     let referenceDate = Calendar.current.startOfDay(for: Date())
@@ -157,24 +162,16 @@ struct AddShiftView: View {
 
 struct CompanySelectionView: View {
     @State private var showAddCompany = false
-
     @Binding var selectedCompany: Company?
-    @Environment(\.modelContext) private var modelContext
+    @Environment(\.container) private var container
     @State private var companies: [Company] = []
-    
-    var addCompanyDestination: AddNewCompanyView {
-        let repo = SwiftDataCompanyRepo(context: modelContext)
-        let useCase = CompanyUseCase(companyRepository: repo)
-        return AddNewCompanyView(companyUseCase: useCase)
-    }
     
     var body: some View {
         VStack {
-            
             List(companies) { company in
                 Button {
                     selectedCompany = company
-                }label: {
+                } label: {
                     HStack {
                         Text(company.name)
                         Spacer()
@@ -199,14 +196,12 @@ struct CompanySelectionView: View {
                     .cornerRadius(10)
                     .padding(10)
             }
-
         }
-        .fullScreenCover(isPresented: $showAddCompany, content: {
+        .fullScreenCover(isPresented: $showAddCompany) {
             NavigationStack {
-                addCompanyDestination
+                AddNewCompanyView(companyUseCase: container.companyUseCase)
             }
-        })
-    
+        }
         .navigationTitle("Select Company")
         .onAppear {
             fetchCompanies()
@@ -214,22 +209,16 @@ struct CompanySelectionView: View {
     }
     
     private func fetchCompanies() {
-        let repo = SwiftDataCompanyRepo(context: modelContext)
-        let useCase = CompanyUseCase(companyRepository: repo)
-        
-        let companies = useCase.getCompanies()
-        
-        
+        let companies = container.companyUseCase.getCompanies()
         DispatchQueue.main.async {
             self.companies = companies
         }
-        
     }
 }
 
 #Preview {
-    let repo = MockShiftRepository()
-    let useCase = ShiftUseCase(shiftRepository: repo)
-    
-    AddShiftView(vm: .init(shiftUseCase: useCase), selectedDate: .constant(Date()))
+    AddShiftView(selectedDate: .constant(Date()))
+        .injectDependencies(DependencyContainer(
+            modelContainer: try! ModelContainer(for: Schema([Company.self, Shift.self]))
+        ))
 }

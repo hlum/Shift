@@ -6,22 +6,23 @@
 //
 
 import SwiftUI
+import SwiftData
 
+@MainActor
 struct SettingView: View {
-    @Environment(\.modelContext) var modelContext
+    @Environment(\.container) private var container
+    
     var body: some View {
         Form {
             Section {
                 NavigationLink {
-                    let companyUseCase = CompanyUseCase(companyRepository: SwiftDataCompanyRepo(context: modelContext))
-                    CompanyListView(vm: CompanyListViewModel(companyUseCase: companyUseCase))
+                    CompanyListView(companyUseCase: container.companyUseCase)
                 } label: {
                     Text("Company")
                 }
             } header: {
                 Text("Company List")
             }
-
         }
     }
 }
@@ -29,5 +30,8 @@ struct SettingView: View {
 #Preview {
     NavigationStack {
         SettingView()
+            .injectDependencies(DependencyContainer(
+                modelContainer: try! ModelContainer(for: Schema([Company.self, Shift.self]))
+            ))
     }
 }

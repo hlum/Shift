@@ -8,7 +8,7 @@
 import Foundation
 import SwiftData
 
-final class CompanyUseCase {
+class CompanyUseCase {
     private let companyRepository: CompanyRepository
     
     init(companyRepository: CompanyRepository) {
@@ -32,4 +32,11 @@ final class CompanyUseCase {
     }
     
     
+}
+
+
+class MockCompanyUseCase: CompanyUseCase {
+    init() {
+        super.init(companyRepository: MockCompanyRepository())
+    }
 }
