@@ -14,6 +14,7 @@ struct FSCalendarView: UIViewRepresentable {
     @Binding var selectedDate: Date
     @Binding var needToUpdateUI: Bool
     @Binding var publicHolidays: [Holiday]
+    @Binding var shiftsForSelectedDate: [Shift]
     @Environment(\.container) private var container
     @Environment(\.locale) private var locale
 
@@ -94,23 +95,7 @@ struct FSCalendarView: UIViewRepresentable {
         
         
         func calendar(_ calendar: FSCalendar, numberOfEventsFor date: Date) -> Int {
-            let calendar = Calendar.current
-            let startOfDay = calendar.startOfDay(for: date)
-            let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
-            
-            let predicate = #Predicate<Shift> { shift in
-                shift.startTime >= startOfDay && shift.startTime < endOfDay
-            }
-            
-            let descriptor = FetchDescriptor(predicate: predicate)
-            
-            do {
-                let shifts = try shiftUseCase.fetchShifts(descriptor: descriptor)
-                return shifts.count
-            } catch {
-                Logger.standard.error("Can't fetch shifts: \(error.localizedDescription)")
-                return 0
-            }
+            return parent.shiftsForSelectedDate.count
         }
         
     }

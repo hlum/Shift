@@ -42,13 +42,15 @@ final class CalendarViewModel: ObservableObject {
     private func addListenerToSelectedDate() {
         $selectedDate
             .sink { [weak self] date in
-                self?.fetchShifts(for: date)
-                self?.fetchHolidays(for: date)
+                Task {
+                    await self?.fetchShifts(for: date)
+                    await self?.fetchHolidays(for: date)
+                }
             }
             .store(in: &cancellables)
     }
     
-    func fetchShifts(for date: Date) {
+    func fetchShifts(for date: Date) async {
         isLoading = true
         error = nil
         
@@ -63,8 +65,8 @@ final class CalendarViewModel: ObservableObject {
         let descriptor = FetchDescriptor(predicate: predicate)
         
         do {
-            let shifts = try shiftUseCase.fetchShifts(descriptor: descriptor)
-            DispatchQueue.main.async { [weak self] in
+            let shifts = try await shiftUseCase.fetchShifts(descriptor: descriptor)
+            await MainActor.run { [weak self] in
                 self?.shifts = shifts
                 self?.isLoading = false
             }
@@ -77,6 +79,7 @@ final class CalendarViewModel: ObservableObject {
     }
     
     
+    
     func fetchAllHolidays() {
         Task { @MainActor in
             self.publicHolidays = await holidayUseCase.fetchHolidays()
@@ -85,23 +88,24 @@ final class CalendarViewModel: ObservableObject {
     }
     
     
-    func fetchHolidays(for date: Date) {
-        Task { @MainActor in
-            self.holidaysForSelectedDate = await holidayUseCase.fetchHoliday(for: date)
-            self.updateUI()
+    func fetchHolidays(for date: Date) async {
+        let holidaysForSelectedDate = await holidayUseCase.fetchHoliday(for: date)
+        await MainActor.run {
+            self.holidaysForSelectedDate = holidaysForSelectedDate
         }
+        self.updateUI()
     }
     
-    func deleteShift(_ shift: Shift) {
+    func deleteShift(_ shift: Shift) async {
         isLoading = true
         error = nil
         
         do {
-            try shiftUseCase.deleteShift(shift)
-            fetchShifts(for: selectedDate)
+            try await shiftUseCase.deleteShift(shift)
+            await fetchShifts(for: selectedDate)
             updateUI()
         } catch {
-            DispatchQueue.main.async { [weak self] in
+            await MainActor.run { [weak self] in
                 self?.error = error
                 self?.isLoading = false
             }
