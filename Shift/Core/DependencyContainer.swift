@@ -7,13 +7,16 @@ protocol ContainerProtocol {
     var modelContext: ModelContext { get }
     var shiftRepository: ShiftRepository { get }
     var companyRepository: CompanyRepository { get }
+    var holidayRepository: HolidayRepository { get }
     var shiftUseCase: ShiftUseCase { get }
     var companyUseCase: CompanyUseCase { get }
+    var holidayUseCase: HolidayUseCase { get }
 }
 
 // MARK: - Container
 @MainActor
 final class DependencyContainer: ContainerProtocol {
+    
     private let modelContainer: ModelContainer
     
     init(modelContainer: ModelContainer) {
@@ -32,6 +35,10 @@ final class DependencyContainer: ContainerProtocol {
         SwiftDataCompanyRepo(context: modelContext)
     }
     
+    var holidayRepository: HolidayRepository {
+        SwiftDataHolidayRepository(context: modelContext, apiClient: HolidayAPIClient())
+    }
+    
     var shiftUseCase: ShiftUseCase {
         ShiftUseCase(shiftRepository: shiftRepository)
     }
@@ -39,13 +46,17 @@ final class DependencyContainer: ContainerProtocol {
     var companyUseCase: CompanyUseCase {
         CompanyUseCase(companyRepository: companyRepository)
     }
+    
+    var holidayUseCase: HolidayUseCase {
+        HolidayUseCase(holidayRepository: holidayRepository)
+    }
 }
 
 // MARK: - Environment Key
 private struct ContainerKey: EnvironmentKey {
     @MainActor
     static let defaultValue: ContainerProtocol = DependencyContainer(
-        modelContainer: try! ModelContainer(for: Schema([Company.self, Shift.self]))
+        modelContainer: try! ModelContainer(for: Schema([Company.self, Shift.self, Holiday.self]))
     )
 }
 
