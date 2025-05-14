@@ -30,11 +30,11 @@ class HolidayUseCase {
         }
     }
     
-    func fetchHolidays() async throws -> [Holiday] {
+    func fetchHolidays() -> [Holiday] {
         return self.publicHolidays
     }
     
-    func fetchHoliday(for date: Date) async throws -> [Holiday] {
+    func fetchHoliday(for date: Date) -> [Holiday] {
         let result = publicHolidays.filter { holiday in
             Calendar.current.isDate(holiday.date, inSameDayAs: date)
         }
