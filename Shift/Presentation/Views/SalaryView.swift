@@ -10,16 +10,19 @@ import SwiftData
 
 final class SalaryViewModel: ObservableObject {
     private let shiftUseCase: ShiftUseCase
+    private let holidayUseCase: HolidayUseCase
+    
     @Published var selectedDate: Date = Date()
     @Published var shifts: [Shift] = []
     @Published var totalSalary: Double = 0
     
-    init(shiftUseCase: ShiftUseCase) {
+    init(shiftUseCase: ShiftUseCase, holidayUseCase: HolidayUseCase) {
         self.shiftUseCase = shiftUseCase
+        self.holidayUseCase = holidayUseCase
     }
     
     
-    func fetchShifts() {
+    func fetchShifts() async {
         let calendar = Calendar.current
 
         // 🌙 月初め（例：2025-05-01 00:00:00）
@@ -43,24 +46,34 @@ final class SalaryViewModel: ObservableObject {
         let descriptor = FetchDescriptor<Shift>(predicate: predicate)
         do {
             let shifts = try shiftUseCase.fetchShifts(descriptor: descriptor)
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self.shifts = shifts
-                self.getTotalSalary()
+                await self.getTotalSalary(shifts: self.shifts)
             }
+            
+
         } catch {
             print("Error fetching shifts: \(error.localizedDescription)")
         }
     }
     
     
-    func getTotalSalary() {
-        totalSalary = 0
+    private func getTotalSalary(shifts: [Shift]) async {
+        DispatchQueue.main.async {
+            self.totalSalary = 0
+        }
         guard !shifts.isEmpty else {
+            print("There is no shift found to calculate total salary.")
             return
         }
         var total = 0.0
         for shift in shifts {
-            total += shift.salary
+            do {
+                let salary = try await shift.getSalary(holidayUseCase: holidayUseCase)
+                total += salary
+            } catch {
+                print("Error calculating total salary: \(error.localizedDescription)")
+            }
         }
         DispatchQueue.main.async {
             self.totalSalary = total
@@ -74,8 +87,8 @@ struct SalaryView: View {
     @StateObject var vm: SalaryViewModel
     @Environment(\.locale) private var locale
     
-    init(shiftUseCase: ShiftUseCase = MockShiftUseCase()) {
-        _vm = StateObject(wrappedValue: SalaryViewModel(shiftUseCase: shiftUseCase))
+    init(shiftUseCase: ShiftUseCase = MockShiftUseCase(), holidayUseCase: HolidayUseCase = MockHolidayUseCase()) {
+        _vm = StateObject(wrappedValue: SalaryViewModel(shiftUseCase: shiftUseCase, holidayUseCase: holidayUseCase))
     }
     
     var body: some View {
@@ -86,9 +99,11 @@ struct SalaryView: View {
             HStack {
                 Image(systemName: "lessthan.circle")
                     .onTapGesture {
-                        let lastMonth = Calendar.current.date(byAdding: .month, value: -1, to: vm.selectedDate)!
-                        vm.selectedDate = lastMonth
-                        vm.fetchShifts()
+                        Task {
+                            let lastMonth = Calendar.current.date(byAdding: .month, value: -1, to: vm.selectedDate)!
+                            vm.selectedDate = lastMonth
+                            await vm.fetchShifts()
+                        }
                     }
                 Spacer()
                 
@@ -97,16 +112,18 @@ struct SalaryView: View {
                 Spacer()
                 Image(systemName: "greaterthan.circle")
                     .onTapGesture {
-                        let nextMonth = Calendar.current.date(byAdding: .month, value: 1, to: vm.selectedDate)!
-                        vm.selectedDate = nextMonth
-                        vm.fetchShifts()
+                        Task {
+                            let nextMonth = Calendar.current.date(byAdding: .month, value: 1, to: vm.selectedDate)!
+                            vm.selectedDate = nextMonth
+                            await vm.fetchShifts()
+                        }
                     }
             }
             
             Spacer()
         }
-        .onAppear {
-            vm.fetchShifts()
+        .task {
+            await vm.fetchShifts()
         }
     }
     

@@ -10,19 +10,21 @@ import Foundation
 final class SalaryCalculator {
     private let company: Company
     private let shift: Shift
+    private let holidayUseCase: HolidayUseCase
     
     private let debugShift: String = "Fa"
     
     
     
-    init(company: Company, shift: Shift) {
+    init(company: Company, shift: Shift, holidayUseCase: HolidayUseCase) {
         self.company = company
         self.shift = shift
+        self.holidayUseCase = holidayUseCase
     }
     
     
     
-    func calculateTotalSalary() -> Double {
+    func calculateTotalSalary() async throws -> Double {
         var totalSalary: Double = 0
         
         // Add transportation expense
@@ -48,7 +50,10 @@ final class SalaryCalculator {
         
         // Determine base rate - use holiday salary if available
         let companyHasHolidaySalary = company.salary.holidaySalary != nil
-        let isHoliday = false // TODO: Implement holiday check
+        
+        // Check if the shift date is a holiday
+        let holidays = try await holidayUseCase.fetchHoliday(for: roundedStartTime, countryCode: "JP")
+        let isHoliday = !holidays.isEmpty
         
         debug(for: debugShift, "isHoliday: \(isHoliday)")
         

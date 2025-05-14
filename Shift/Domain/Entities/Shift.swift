@@ -31,9 +31,10 @@ final class Shift {
 
 extension Shift {
     
-    var salary: Double {
-        let calculator = SalaryCalculator(company: company, shift: self)
-        return calculator.calculateTotalSalary()
+    func getSalary(holidayUseCase: HolidayUseCase) async throws -> Double {
+        let salaryCalculator = SalaryCalculator(company: company, shift: self, holidayUseCase: holidayUseCase)
+        
+        return try await salaryCalculator.calculateTotalSalary()
     }
 }
 
