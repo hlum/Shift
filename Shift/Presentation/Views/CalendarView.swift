@@ -29,7 +29,8 @@ struct CalendarView: View {
             FSCalendarView(
                 selectedDate: $vm.selectedDate,
                 needToUpdateUI: $vm.needToUpdateUI,
-                publicHolidays: $vm.publicHolidays
+                publicHolidays: $vm.publicHolidays,
+                shifts: $vm.allShifts
             )
             .frame(maxWidth: .infinity)
 
@@ -41,13 +42,14 @@ struct CalendarView: View {
                 List {
                     ForEach(vm.holidaysForSelectedDate) { holiday in
                         Text(holiday.name).foregroundStyle(.red)
-                        Text(holiday.date.description)
                     }
                     ForEach(vm.shifts) { shift in
                         ShiftSubView(shift: shift)
                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                 Button {
-                                    vm.deleteShift(shift)
+                                    Task { @MainActor in
+                                        await vm.deleteShift(shift)
+                                    }
                                 } label: {
                                     Image(systemName: "trash")
                                         .tint(.red)
@@ -74,8 +76,11 @@ struct CalendarView: View {
         }
         .fullScreenCover(isPresented: $vm.showAddShiftView) {
             // On Dismiss
-            vm.fetchShifts(for: vm.selectedDate)
-            vm.updateUI()
+            Task { @MainActor in
+                await vm.fetchAllShifts()
+                vm.getShift(for: vm.selectedDate)
+                vm.updateUI()
+            }
         } content: {
             AddShiftView(shiftUseCase: container.shiftUseCase, selectedDate: $vm.selectedDate)
         }

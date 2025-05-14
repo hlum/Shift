@@ -48,7 +48,7 @@ final class AddNewCompanyViewModel: ObservableObject {
         (lateSalary == nil || (lateSalaryStartTime != nil && lateSalaryEndTime != nil))
     }
     
-    func addNewCompany() {
+    func addNewCompany() async {
         guard isValid else {
             error = ValidationError.invalidInput
             return
@@ -87,7 +87,7 @@ final class AddNewCompanyViewModel: ObservableObject {
                 salary: salary
             )
             
-            companyUseCase.addCompany(newCompany)
+            await companyUseCase.addCompany(newCompany)
             isLoading = false
         } catch {
             self.error = error
@@ -173,8 +173,10 @@ struct AddNewCompanyView: View {
                 }
                 
                 Button {
-                    vm.addNewCompany()
-                    dismiss.callAsFunction()
+                    Task {
+                        await vm.addNewCompany()
+                        dismiss.callAsFunction()
+                    }
                 } label: {
                     Text("Add New Company")
                         .font(.headline)

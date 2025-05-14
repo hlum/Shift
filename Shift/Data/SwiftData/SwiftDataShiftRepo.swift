@@ -8,6 +8,7 @@
 import Foundation
 import SwiftData
 
+@MainActor
 final class SwiftDataShiftRepo: ShiftRepository {
     private let context: ModelContext
     
@@ -17,13 +18,13 @@ final class SwiftDataShiftRepo: ShiftRepository {
     
     
     
-    func fetchShifts(descriptor: FetchDescriptor<Shift>) throws -> [Shift] {
+    func fetchShifts(descriptor: FetchDescriptor<Shift>) async throws -> [Shift] {
         return try context.fetch(descriptor)
     }
     
     
     
-    func addShift(_ shift: Shift) throws {
+    func addShift(_ shift: Shift) async throws {
         shift.company.shifts.append(shift)
         context.insert(shift)
         try context.save()
@@ -31,7 +32,7 @@ final class SwiftDataShiftRepo: ShiftRepository {
     
     
     
-    func updateShift(_ shift: Shift) throws {
+    func updateShift(_ shift: Shift) async throws {
         let id = shift.id // Capture the value
         let descriptor = FetchDescriptor<Shift>(predicate: #Predicate { $0.id == id })
         if let existing = try context.fetch(descriptor).first {
@@ -55,7 +56,7 @@ final class SwiftDataShiftRepo: ShiftRepository {
 
 
     
-    func deleteShift(_ shift: Shift) throws {
+    func deleteShift(_ shift: Shift) async throws {
         // Remove from company's shifts array
         if let index = shift.company.shifts.firstIndex(where: { $0.id == shift.id }) {
             shift.company.shifts.remove(at: index)

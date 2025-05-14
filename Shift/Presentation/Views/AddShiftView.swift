@@ -31,7 +31,7 @@ final class AddShiftViewModel: ObservableObject {
     }
     
     /// Return true if adding shift is success
-    func addShift() -> Bool {
+    func addShift() async -> Bool {
         guard let company else {
             // Show Alert
             errorMessage = "Company is required"
@@ -47,7 +47,7 @@ final class AddShiftViewModel: ObservableObject {
         
         let newShift = Shift(name: title, startTime: startTime, breakDuration: breakDuration, endTime: endTime, company: company)
         do {
-            try shiftUseCase.addShift(newShift)
+            try await shiftUseCase.addShift(newShift)
             errorMessage = nil
             return true
         } catch {
@@ -137,10 +137,12 @@ struct AddShiftView: View {
                     
                     
                     Button {
-                        let shiftAdded = vm.addShift()
-                        if shiftAdded {
-                            dismiss.callAsFunction()
-                            selectedDate = vm.startTime
+                        Task { @MainActor in
+                            let shiftAdded = await vm.addShift()
+                            if shiftAdded {
+                                dismiss.callAsFunction()
+                                selectedDate = vm.startTime
+                            }
                         }
                     } label: {
                         Text("Add Shift")
@@ -203,14 +205,14 @@ struct CompanySelectionView: View {
             }
         }
         .navigationTitle("Select Company")
-        .onAppear {
-            fetchCompanies()
+        .task {
+            await fetchCompanies()
         }
     }
     
-    private func fetchCompanies() {
-        let companies = container.companyUseCase.getCompanies()
-        DispatchQueue.main.async {
+    private func fetchCompanies() async {
+        let companies = await container.companyUseCase.getCompanies()
+        await MainActor.run {
             self.companies = companies
         }
     }

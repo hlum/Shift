@@ -42,7 +42,7 @@ final class SalaryViewModel: ObservableObject {
         
         do {
             let descriptor = FetchDescriptor<Shift>(predicate: predicate)
-            let fetchedShifts = try shiftUseCase.fetchShifts(descriptor: descriptor)
+            let fetchedShifts = try await shiftUseCase.fetchShifts(descriptor: descriptor)
             await MainActor.run { self.shifts = fetchedShifts }
             await calculateTotalSalary(for: fetchedShifts)
         } catch {

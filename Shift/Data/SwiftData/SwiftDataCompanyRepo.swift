@@ -8,6 +8,7 @@
 import Foundation
 import SwiftData
 
+@MainActor
 final class SwiftDataCompanyRepo: CompanyRepository {
     private let context: ModelContext
     
@@ -17,15 +18,15 @@ final class SwiftDataCompanyRepo: CompanyRepository {
 
     
     
-    func fetchCompanies(descriptor: FetchDescriptor<Company>) throws -> [Company] {
+    func fetchCompanies(descriptor: FetchDescriptor<Company>) async throws -> [Company] {
         return try context.fetch(descriptor)
     }
     
-    func addCompany(_ company: Company) {
+    func addCompany(_ company: Company) async {
         context.insert(company)
     }
     
-    func updateCompany(_ company: Company) throws {
+    func updateCompany(_ company: Company) async throws {
         let id = company.id
         let descriptor = FetchDescriptor<Company>(predicate: #Predicate{ $0.id == id })
         
@@ -38,7 +39,7 @@ final class SwiftDataCompanyRepo: CompanyRepository {
         }
     }
     
-    func deleteCompany(_ company: Company) throws {
+    func deleteCompany(_ company: Company) async throws {
         context.delete(company)
     }
     
