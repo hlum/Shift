@@ -13,7 +13,8 @@ struct ShiftApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Company.self,
-            Shift.self
+            Shift.self,
+            Holiday.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
