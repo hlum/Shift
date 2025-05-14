@@ -13,7 +13,9 @@ import SwiftData
 struct FSCalendarView: UIViewRepresentable {
     @Binding var selectedDate: Date
     @Binding var needToUpdateUI: Bool
-    @Environment(\.modelContext) private var modelContext
+    @Binding var publicHolidays: [Holiday]
+    @Environment(\.container) private var container
+    @Environment(\.locale) private var locale
 
 
     func makeUIView(context: Context) -> some UIView {
@@ -41,10 +43,10 @@ struct FSCalendarView: UIViewRepresentable {
         return fsCalendar
     }
     
+
     
     func makeCoordinator() -> Coordinator {
-        let shiftUseCase = ShiftUseCase(shiftRepository: SwiftDataShiftRepo(context: modelContext ))
-        return Coordinator(parent: self, shiftUseCase: shiftUseCase)
+        return Coordinator(parent: self, shiftUseCase: container.shiftUseCase, holidayUseCase: container.holidayUseCase)
     }
     
     
@@ -61,21 +63,33 @@ struct FSCalendarView: UIViewRepresentable {
     
     
     
-    class Coordinator: NSObject, FSCalendarDelegate, FSCalendarDataSource {
+    class Coordinator: NSObject, FSCalendarDelegate, FSCalendarDataSource, FSCalendarDelegateAppearance {
         weak var calendar: FSCalendar?
         var parent: FSCalendarView
         var shiftUseCase: ShiftUseCase
-
+        var holidayUseCase: HolidayUseCase
         let dateFormatter = DateFormatter()
         
-        init(parent: FSCalendarView, shiftUseCase: ShiftUseCase) {
+
+        
+        init(parent: FSCalendarView, shiftUseCase: ShiftUseCase, holidayUseCase: HolidayUseCase) {
             self.parent = parent
             self.shiftUseCase = shiftUseCase
+            self.holidayUseCase = holidayUseCase
         }
         
         
         func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
             parent.selectedDate = date
+        }
+        
+        
+        func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, titleDefaultColorFor date: Date) -> UIColor? {
+            let isPublicHoliday = parent.publicHolidays.contains(where: { Calendar.current.isDate($0.date, inSameDayAs: date) })
+            if  isPublicHoliday || holidayUseCase.isWeekend(date) {
+                return .red
+            }
+            return nil
         }
         
         
