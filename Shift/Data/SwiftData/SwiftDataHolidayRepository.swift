@@ -8,7 +8,7 @@ final class SwiftDataHolidayRepository: HolidayRepository {
     
     init(
         context: ModelContext,
-        apiClient: HolidayAPIClientProtocol = HolidayAPIClient(),
+        apiClient: HolidayAPIClientProtocol,
         calendar: Calendar = .current
     ) {
         self.context = context
