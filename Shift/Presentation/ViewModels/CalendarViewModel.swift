@@ -50,6 +50,7 @@ final class CalendarViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
+    @MainActor
     func fetchShifts(for date: Date) async {
         isLoading = true
         error = nil
@@ -66,15 +67,13 @@ final class CalendarViewModel: ObservableObject {
         
         do {
             let shifts = try await shiftUseCase.fetchShifts(descriptor: descriptor)
-            await MainActor.run { [weak self] in
-                self?.shifts = shifts
-                self?.isLoading = false
-            }
+            self.shifts = shifts
+            self.isLoading = false
+            
         } catch {
-            DispatchQueue.main.async { [weak self] in
-                self?.error = error
-                self?.isLoading = false
-            }
+            self.error = error
+            self.isLoading = false
+            
         }
     }
     

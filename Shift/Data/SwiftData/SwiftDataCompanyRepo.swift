@@ -8,7 +8,8 @@
 import Foundation
 import SwiftData
 
-final actor SwiftDataCompanyRepo: CompanyRepository {
+@MainActor
+final class SwiftDataCompanyRepo: CompanyRepository {
     private let context: ModelContext
     
     init(context: ModelContext) {

@@ -8,7 +8,8 @@
 import Foundation
 import SwiftData
 
-final actor SwiftDataShiftRepo: ShiftRepository {
+@MainActor
+final class SwiftDataShiftRepo: ShiftRepository {
     private let context: ModelContext
     
     init(context: ModelContext) {
