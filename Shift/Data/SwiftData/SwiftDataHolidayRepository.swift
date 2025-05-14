@@ -1,7 +1,7 @@
 import Foundation
 import SwiftData
 
-final class SwiftDataHolidayRepository: HolidayRepository {    
+final actor SwiftDataHolidayRepository: HolidayRepository {
     private let context: ModelContext
     private let apiClient: HolidayAPIClientProtocol
     private let calendar: Calendar
