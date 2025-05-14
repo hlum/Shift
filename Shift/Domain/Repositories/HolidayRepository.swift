@@ -7,6 +7,7 @@
 
 import Foundation
 
-protocol HolidayAPIRepository {
-    func fetchHolidays(countryCode: String, year: Int) throws -> [Holiday]
+protocol HolidayRepository {
+    func fetchHolidays(for year: Int, countryCode: String) async throws -> [Holiday]
+    func isHolidayDataLoaded(for year: Int) async throws -> Bool
 }
