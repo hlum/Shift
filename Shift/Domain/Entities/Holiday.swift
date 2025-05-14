@@ -1,24 +1,24 @@
-//
-//  Holiday.swift
-//  Shift
-//
-//  Created by cmStudent on 2025/05/13.
-//
-
 import Foundation
+import SwiftData
 
-struct Holiday: Decodable {
-    let name: String
-    let dateString: String
+@Model
+final class Holiday: Identifiable, Equatable {
+    @Attribute(.unique) var id: String
+    var name: String
+    var date: Date
+    var countryCode: String
     
-    enum CodingKeys: String, CodingKey {
-        case name
-        case dateString = "date"
+    init(id: String = UUID().uuidString, name: String, date: Date, countryCode: String) {
+        self.id = id
+        self.name = name
+        self.date = date
+        self.countryCode = countryCode
     }
-    
-    var date: Date {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MM/dd/yyyy"
-        return formatter.date(from: dateString)!
+
+    init(holidayApiResponse: HolidayAPIResponse) {
+        self.id = UUID().uuidString
+        self.name = holidayApiResponse.name
+        self.date = holidayApiResponse.date
+        self.countryCode = holidayApiResponse.countryCode
     }
-}
+} 
