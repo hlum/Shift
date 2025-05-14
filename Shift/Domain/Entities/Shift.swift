@@ -31,8 +31,8 @@ final class Shift {
 
 extension Shift {
     
-    func getSalary(holidayUseCase: HolidayUseCase) async throws -> Double {
-        let salaryCalculator = SalaryCalculator(company: company, shift: self, holidayUseCase: holidayUseCase)
+    func getSalary(holidayUseCase: HolidayUseCase, countryCode: String) async throws -> Double {
+        let salaryCalculator = SalaryCalculator(company: company, shift: self, holidayUseCase: holidayUseCase, countryCode: countryCode)
         
         return try await salaryCalculator.calculateTotalSalary()
     }

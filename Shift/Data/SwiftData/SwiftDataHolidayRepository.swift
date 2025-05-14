@@ -58,7 +58,7 @@ extension SwiftDataHolidayRepository {
         let (last, current, next) = try await isAllThreeYearHolidayDataLoaded(currentYear: year)
         
         if last && current && next {
-            print("All three year holiday data already loaded for year: \(year)")
+            print("All three year holiday data already loaded for year: \(year) \(countryCode)")
             return
         }
         

@@ -11,15 +11,17 @@ final class SalaryCalculator {
     private let company: Company
     private let shift: Shift
     private let holidayUseCase: HolidayUseCase
+    private let countryCode: String
     
     private let debugShift: String = "Fa"
     
     
     
-    init(company: Company, shift: Shift, holidayUseCase: HolidayUseCase) {
+    init(company: Company, shift: Shift, holidayUseCase: HolidayUseCase, countryCode: String) {
         self.company = company
         self.shift = shift
         self.holidayUseCase = holidayUseCase
+        self.countryCode = countryCode
     }
     
     
@@ -52,7 +54,7 @@ final class SalaryCalculator {
         let companyHasHolidaySalary = company.salary.holidaySalary != nil
         
         // Check if the shift date is a holiday
-        let holidays = try await holidayUseCase.fetchHoliday(for: roundedStartTime, countryCode: "JP")
+        let holidays = try await holidayUseCase.fetchHoliday(for: roundedStartTime, countryCode: countryCode)
         let isHoliday = !holidays.isEmpty
         
         debug(for: debugShift, "isHoliday: \(isHoliday)")
