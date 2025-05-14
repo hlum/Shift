@@ -16,6 +16,7 @@ final class SwiftDataHolidayRepository: HolidayRepository {
         self.calendar = calendar
     }
     
+    @MainActor
     func fetchHolidays(for date: Date, countryCode: String) async throws -> [Holiday] {
         
         let currentYear = calendar.component(.year, from: date)
@@ -40,7 +41,7 @@ final class SwiftDataHolidayRepository: HolidayRepository {
         return holidays
     }
     
-    
+    @MainActor
     func fetchHolidays(countryCode: String) async throws -> [Holiday] {
         let currentYear = calendar.component(.year, from: Date())
         try await checkAndLoadHolidaysLastCurrentNextYear(for: currentYear, countryCode: countryCode)

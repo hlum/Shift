@@ -13,6 +13,7 @@ import SwiftData
 struct FSCalendarView: UIViewRepresentable {
     @Binding var selectedDate: Date
     @Binding var needToUpdateUI: Bool
+    @Binding var publicHolidays: [Holiday]
     @Environment(\.container) private var container
     @Environment(\.locale) private var locale
 
@@ -67,7 +68,6 @@ struct FSCalendarView: UIViewRepresentable {
         var parent: FSCalendarView
         var shiftUseCase: ShiftUseCase
         var holidayUseCase: HolidayUseCase
-
         let dateFormatter = DateFormatter()
         
 
@@ -85,8 +85,7 @@ struct FSCalendarView: UIViewRepresentable {
         
         
         func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, titleDefaultColorFor date: Date) -> UIColor? {
-            let publicHolidays = holidayUseCase.fetchHolidays()
-            let isPublicHoliday = publicHolidays.contains(where: { Calendar.current.isDate($0.date, inSameDayAs: date) })
+            let isPublicHoliday = parent.publicHolidays.contains(where: { Calendar.current.isDate($0.date, inSameDayAs: date) })
             if  isPublicHoliday || holidayUseCase.isWeekend(date) {
                 return .red
             }

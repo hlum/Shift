@@ -14,8 +14,13 @@ struct CalendarView: View {
     @StateObject var vm: CalendarViewModel
     @Environment(\.container) private var container
     
-    init(shiftUseCase: ShiftUseCase? = nil) {
-        _vm = .init(wrappedValue: .init(shiftUseCase: shiftUseCase ?? MockShiftUseCase()))
+    init(shiftUseCase: ShiftUseCase? = nil, holidayUseCase: HolidayUseCase? = nil) {
+        _vm = .init(
+            wrappedValue: .init(
+                shiftUseCase: shiftUseCase ?? MockShiftUseCase(),
+                holidayUseCase: holidayUseCase ?? MockHolidayUseCase()
+            )
+        )
     }
     
     var body: some View {
@@ -23,7 +28,8 @@ struct CalendarView: View {
         VStack {
             FSCalendarView(
                 selectedDate: $vm.selectedDate,
-                needToUpdateUI: $vm.needToUpdateUI
+                needToUpdateUI: $vm.needToUpdateUI,
+                publicHolidays: $vm.publicHolidays
             )
             .frame(maxWidth: .infinity)
 
@@ -33,6 +39,10 @@ struct CalendarView: View {
                 selectedDateHeader(selectedDate: vm.selectedDate)
                 
                 List {
+                    ForEach(vm.holidaysForSelectedDate) { holiday in
+                        Text(holiday.name).foregroundStyle(.red)
+                        Text(holiday.date.description)
+                    }
                     ForEach(vm.shifts) { shift in
                         ShiftSubView(shift: shift)
                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
@@ -79,7 +89,8 @@ struct CalendarView: View {
             .padding(.horizontal)
             .frame(maxWidth: .infinity, alignment: .leading)
             .frame(height: 30)
-            .background(.gray)
+            .background(.gray.opacity(0.1))
+            .foregroundStyle(vm.holidaysForSelectedDate.count > 0 ? .red : .black)
         
     }
 }

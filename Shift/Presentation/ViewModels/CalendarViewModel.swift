@@ -12,6 +12,8 @@ import Combine
 final class CalendarViewModel: ObservableObject {
     @Published var selectedDate: Date = Date()
     @Published var shifts: [Shift] = []
+    @Published var holidaysForSelectedDate: [Holiday] = []
+    @Published var publicHolidays: [Holiday] = []
     
     @Published var showAddShiftView: Bool = false
     
@@ -22,10 +24,13 @@ final class CalendarViewModel: ObservableObject {
     @Published var error: Error?
     
     private let shiftUseCase: ShiftUseCase
+    private let holidayUseCase: HolidayUseCase
     
-    init(shiftUseCase: ShiftUseCase) {
+    init(shiftUseCase: ShiftUseCase, holidayUseCase: HolidayUseCase) {
         self.shiftUseCase = shiftUseCase
+        self.holidayUseCase = holidayUseCase
         self.addListenerToSelectedDate()
+        fetchAllHolidays()
     }
     
     deinit {
@@ -38,6 +43,7 @@ final class CalendarViewModel: ObservableObject {
         $selectedDate
             .sink { [weak self] date in
                 self?.fetchShifts(for: date)
+                self?.fetchHolidays(for: date)
             }
             .store(in: &cancellables)
     }
@@ -70,6 +76,22 @@ final class CalendarViewModel: ObservableObject {
         }
     }
     
+    
+    func fetchAllHolidays() {
+        Task { @MainActor in
+            self.publicHolidays = await holidayUseCase.fetchHolidays()
+            self.updateUI()
+        }
+    }
+    
+    
+    func fetchHolidays(for date: Date) {
+        Task { @MainActor in
+            self.holidaysForSelectedDate = await holidayUseCase.fetchHoliday(for: date)
+            self.updateUI()
+        }
+    }
+    
     func deleteShift(_ shift: Shift) {
         isLoading = true
         error = nil
@@ -96,9 +118,10 @@ final class CalendarViewModel: ObservableObject {
 // Preview 用のViewModel
 extension CalendarViewModel {
     static func preview() -> CalendarViewModel {
-        let repo = MockShiftRepository()
-        let useCase = ShiftUseCase(shiftRepository: repo)
-        let viewModel = CalendarViewModel(shiftUseCase: useCase)
+        let viewModel = CalendarViewModel(
+            shiftUseCase: MockShiftUseCase(),
+            holidayUseCase: MockHolidayUseCase()
+        )
         
         return viewModel
     }

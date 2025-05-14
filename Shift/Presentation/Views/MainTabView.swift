@@ -15,7 +15,7 @@ struct MainTabView: View {
     var body: some View {
         NavigationStack {
             TabView {
-                CalendarView(shiftUseCase: container.shiftUseCase)
+                CalendarView(shiftUseCase: container.shiftUseCase, holidayUseCase: container.holidayUseCase)
                     .tabItem {
                         Image(systemName: "calendar")
                     }
