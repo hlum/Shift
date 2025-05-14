@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		7F2114102DC468A50003B79F /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = 7F21140F2DC468A50003B79F /* FSCalendar */; };
+		7F62A68F2DD3331500B22B69 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 7F62A68E2DD3331500B22B69 /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,6 +42,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7F2114102DC468A50003B79F /* FSCalendar in Frameworks */,
+				7F62A68F2DD3331500B22B69 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -84,6 +86,7 @@
 			name = Shift;
 			packageProductDependencies = (
 				7F21140F2DC468A50003B79F /* FSCalendar */,
+				7F62A68E2DD3331500B22B69 /* FirebaseFirestore */,
 			);
 			productName = Shift;
 			productReference = 7F2113A82DC44BF90003B79F /* Shift.app */;
@@ -115,6 +118,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				7F21140E2DC468A50003B79F /* XCRemoteSwiftPackageReference "FSCalendar" */,
+				7F62A68D2DD3331500B22B69 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7F2113A92DC44BF90003B79F /* Products */;
@@ -362,6 +366,14 @@
 				minimumVersion = 2.8.4;
 			};
 		};
+		7F62A68D2DD3331500B22B69 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.12.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -369,6 +381,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 7F21140E2DC468A50003B79F /* XCRemoteSwiftPackageReference "FSCalendar" */;
 			productName = FSCalendar;
+		};
+		7F62A68E2DD3331500B22B69 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7F62A68D2DD3331500B22B69 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
