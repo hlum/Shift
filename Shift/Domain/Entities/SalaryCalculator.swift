@@ -217,7 +217,7 @@ final class SalaryCalculator {
     
     private func debug(for shift: String, _ text: String) {
         if shift == self.shift.name {
-            print(text)
+            Logger.standard.info("\(text)")
         }
     }
 }
