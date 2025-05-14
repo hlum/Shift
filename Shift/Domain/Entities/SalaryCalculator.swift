@@ -54,8 +54,8 @@ final class SalaryCalculator {
         let companyHasHolidaySalary = company.salary.holidaySalary != nil
         
         // Check if the shift date is a holiday
-        let holidays = try await holidayUseCase.fetchHoliday(for: roundedStartTime)
-        let isHoliday = !holidays.isEmpty
+        let holidays = holidayUseCase.fetchHoliday(for: roundedStartTime)
+        let isHoliday = !holidays.isEmpty && holidayUseCase.isWeekend(roundedStartTime)
         
         debug(for: debugShift, "isHoliday: \(isHoliday)")
         
