@@ -12,7 +12,12 @@ import SwiftData
 
 struct CalendarView: View {
     @StateObject var vm: CalendarViewModel
-    @Environment(\.modelContext) private var modelContext
+    @Environment(\.container) private var container
+    
+    init(shiftUseCase: ShiftUseCase? = nil) {
+        _vm = .init(wrappedValue: .init(shiftUseCase: shiftUseCase ?? MockShiftUseCase()))
+    }
+    
     var body: some View {
         
         VStack {
@@ -42,11 +47,6 @@ struct CalendarView: View {
                     }
                     Button {
                         vm.showAddShiftView.toggle()
-//                        let mockrepo = MockShiftRepository()
-//                        let mockuse = ShiftUseCase(shiftRepository: mockrepo)
-//                        let shift = try? mockuse.fetchShifts().first!
-//                        
-//                        vm.addShift(shift!)
                     } label: {
                         Text("+ Add shift")
                             .font(.headline)
@@ -67,10 +67,7 @@ struct CalendarView: View {
             vm.fetchShifts(for: vm.selectedDate)
             vm.updateUI()
         } content: {
-//#error("Start from here...")
-            let repo = SwiftDataShiftRepo(context: modelContext)
-            let useCase = ShiftUseCase(shiftRepository: repo)
-            AddShiftView(vm: .init(shiftUseCase: useCase), selectedDate: $vm.selectedDate)
+            AddShiftView(shiftUseCase: container.shiftUseCase, selectedDate: $vm.selectedDate)
         }
 
         
@@ -115,7 +112,8 @@ struct ShiftSubView: View {
 
 
 #Preview {
-    CalendarView(vm: CalendarViewModel.preview())
-        .environment(\.locale, Locale(identifier: "ja_JP"))
-        .modelContainer(for: Shift.self, inMemory: true)
+    CalendarView()
+        .injectDependencies(DependencyContainer(
+            modelContainer: try! ModelContainer(for: Schema([Company.self, Shift.self]))
+        ))
 }

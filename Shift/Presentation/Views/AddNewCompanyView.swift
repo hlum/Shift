@@ -23,77 +23,110 @@ final class AddNewCompanyViewModel: ObservableObject {
     @Published var transportationExpense: Int = 0
     @Published var holidaySalary: Int? = nil
     @Published var overtimeSalary: Int? = nil
-    @Published var lateSalary:Int? = nil
+    @Published var lateSalary: Int? = nil
     @Published var lateSalaryStartTime: Date? = Date()
     @Published var lateSalaryEndTime: Date? = Date()
     @Published var paymentType: PaymentType = .hourly
-
     @Published var baseWorkHours: Double? = nil
-    
     
     @Published var showSettlementDatePicker: Bool = false
     @Published var showPayDayPicker: Bool = false
     @Published var showPaymentTypePicker: Bool = false
     
+    @Published var error: Error?
+    @Published var isLoading: Bool = false
     
     init(companyUseCase: CompanyUseCase) {
         self.companyUseCase = companyUseCase
     }
     
-    
+    var isValid: Bool {
+        !companyName.isEmpty &&
+        baseSalary > 0 &&
+        transportationExpense >= 0 &&
+        (paymentType == .oneDay || baseWorkHours != nil) &&
+        (lateSalary == nil || (lateSalaryStartTime != nil && lateSalaryEndTime != nil))
+    }
     
     func addNewCompany() {
-        guard !companyName.isEmpty else {
-            // Show alert
+        guard isValid else {
+            error = ValidationError.invalidInput
             return
         }
         
+        isLoading = true
+        error = nil
         
-        let salary = Salary(
-            baseSalary: baseSalary,
-            transportationExpense: transportationExpense,
-            holidaySalary: holidaySalary,
-            overtimeSalary: baseWorkHours == nil && overtimeSalary == nil ? nil : OverTimeSetting(
-                baseWorkHours: baseWorkHours!,
-                overtimePayRate: overtimeSalary!
-            ),
-            lateSalary: LateSalary(
-                lateSalary: lateSalary,
-                startTime: lateSalaryStartTime,
-                endTime: lateSalaryEndTime
-            ),
-            paymentType: paymentType
-        )
-        let newCompany = Company(
-            name: companyName,
-            color: selectedColor,
-            endDate: settlementDate,
-            payDay: PayDay(
-                payDay: payDay,
-                payTiming: payTiming,
-                holidayPayDayChange: holidayPayDayChange,
-                holidayPayEarly: holidayPayEarly
-            ),
-            salary: salary
-        )
-        
-        companyUseCase.addCompany(newCompany)
+        do {
+            let salary = Salary(
+                baseSalary: baseSalary,
+                transportationExpense: transportationExpense,
+                holidaySalary: holidaySalary,
+                overtimeSalary: baseWorkHours == nil && overtimeSalary == nil ? nil : OverTimeSetting(
+                    baseWorkHours: baseWorkHours!,
+                    overtimePayRate: overtimeSalary!
+                ),
+                lateSalary: LateSalary(
+                    lateSalary: lateSalary,
+                    startTime: lateSalaryStartTime,
+                    endTime: lateSalaryEndTime
+                ),
+                paymentType: paymentType
+            )
+            
+            let newCompany = Company(
+                name: companyName,
+                color: selectedColor,
+                endDate: settlementDate,
+                payDay: PayDay(
+                    payDay: payDay,
+                    payTiming: payTiming,
+                    holidayPayDayChange: holidayPayDayChange,
+                    holidayPayEarly: holidayPayEarly
+                ),
+                salary: salary
+            )
+            
+            companyUseCase.addCompany(newCompany)
+            isLoading = false
+        } catch {
+            self.error = error
+            isLoading = false
+        }
+    }
+    
+    func updateUseCase(_ newUseCase: CompanyUseCase) {
+        self.companyUseCase = newUseCase
+    }
+}
+
+enum ValidationError: LocalizedError {
+    case invalidInput
+    
+    var errorDescription: String? {
+        switch self {
+        case .invalidInput:
+            return "Please check your input values. All required fields must be filled correctly."
+        }
     }
 }
 
 // MARK: AddNewCompanyView
+@MainActor
 struct AddNewCompanyView: View {
     @StateObject private var vm: AddNewCompanyViewModel
     @Environment(\.dismiss) var dismiss
+    @Environment(\.container) private var container
     
-    init(companyUseCase: CompanyUseCase) {
+    init(companyUseCase: CompanyUseCase = MockCompanyUseCase()) {
+        // Initialize with a temporary view model that will be updated when the view appears
         _vm = StateObject(wrappedValue: AddNewCompanyViewModel(companyUseCase: companyUseCase))
     }
+    
     var body: some View {
         ZStack {
             Form {
                 Section {
-
                     LabeledContent("Company Name") {
                         TextField("required", text: $vm.companyName)
                     }
@@ -102,12 +135,8 @@ struct AddNewCompanyView: View {
                 
                 Section {
                     settlementDateSelectionBtn
-                    
                     payDaySelection
-
-
                 }
-                
                 
                 Section("Salary Information") {
                     NavigationLink {
@@ -115,7 +144,8 @@ struct AddNewCompanyView: View {
                             showPaymentTypePicker: $vm.showPaymentTypePicker,
                             baseSalary: $vm.baseSalary,
                             transportationExpense: $vm.transportationExpense,
-                            holidaySalary: $vm.holidaySalary, baseWorkHours: $vm.baseWorkHours,
+                            holidaySalary: $vm.holidaySalary,
+                            baseWorkHours: $vm.baseWorkHours,
                             overtimeSalary: $vm.overtimeSalary,
                             lateSalary: $vm.lateSalary,
                             lateSalaryStartTime: $vm.lateSalaryStartTime,
@@ -128,48 +158,50 @@ struct AddNewCompanyView: View {
                             Text("\(vm.baseSalary)")
                         }
                     }
-
                 }
             }
         }
         .overlay(alignment: .bottom, content: {
-                HStack {
-                    Button {
-                        dismiss.callAsFunction()
-                    } label: {
-                        Text("Cancel")
-                            .font(.headline)
-                            .foregroundStyle(.red)
-                            .padding(10)
-                    }
-                    
-                    Button {
-                        vm.addNewCompany()
-                        dismiss.callAsFunction()
-                    } label: {
-                        Text("Add New Company")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 55)
-                            .background(.blue)
-                            .cornerRadius(10)
-                            .foregroundStyle(.white)
-                    }
+            HStack {
+                Button {
+                    dismiss.callAsFunction()
+                } label: {
+                    Text("Cancel")
+                        .font(.headline)
+                        .foregroundStyle(.red)
+                        .padding(10)
                 }
-                .padding(.horizontal)
                 
-                
-                if vm.showSettlementDatePicker {
-                    SettlementDatePickerView(selection: $vm.settlementDate, isShowing: $vm.showSettlementDatePicker)
+                Button {
+                    vm.addNewCompany()
+                    dismiss.callAsFunction()
+                } label: {
+                    Text("Add New Company")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 55)
+                        .background(.blue)
+                        .cornerRadius(10)
+                        .foregroundStyle(.white)
                 }
+            }
+            .padding(.horizontal)
+            
+            if vm.showSettlementDatePicker {
+                SettlementDatePickerView(selection: $vm.settlementDate, isShowing: $vm.showSettlementDatePicker)
+            }
         })
         .foregroundStyle(.black)
         .navigationTitle("Payment date")
         .navigationBarTitleDisplayMode(.inline)
-
+        .onAppear {
+            // Update the view model with the real use case when the view appears
+            if let realUseCase = container.companyUseCase as? CompanyUseCase {
+                vm.updateUseCase(realUseCase)
+            }
+        }
     }
 }
-
 
 extension AddNewCompanyView {
     
@@ -716,17 +748,14 @@ struct SettlementDatePickerView: View {
 }
 
 
-//#Preview {
-//    LateNightPayView(lateSalary: .constant(1000), lateSalaryStartTime: .constant(nil), lateSalaryEndTime: .constant(nil))
-//}
+// MARK: - Mock Company Use Case for Preview
 
-
-//#Preview {
-//    OverTimeSalaryView(baseWorkHours: .constant(8), overTimePayRate: .constant(1400))
-//}
 
 #Preview {
     NavigationStack {
-        AddNewCompanyView(companyUseCase: CompanyUseCase(companyRepository: MockCompanyRepository()))
+        AddNewCompanyView()
+            .injectDependencies(DependencyContainer(
+                modelContainer: try! ModelContainer(for: Schema([Company.self, Shift.self]))
+            ))
     }
 }

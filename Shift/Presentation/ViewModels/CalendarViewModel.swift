@@ -17,6 +17,10 @@ final class CalendarViewModel: ObservableObject {
     
     @Published var needToUpdateUI: Bool = false
     
+    @Published var isLoading: Bool = false
+    
+    @Published var error: Error?
+    
     private let shiftUseCase: ShiftUseCase
     
     init(shiftUseCase: ShiftUseCase) {
@@ -24,10 +28,13 @@ final class CalendarViewModel: ObservableObject {
         self.addListenerToSelectedDate()
     }
     
+    deinit {
+        cancellables.removeAll()
+    }
+
     private var cancellables = Set<AnyCancellable>()
 
-
-    func addListenerToSelectedDate() {
+    private func addListenerToSelectedDate() {
         $selectedDate
             .sink { [weak self] date in
                 self?.fetchShifts(for: date)
@@ -35,8 +42,10 @@ final class CalendarViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
-    
     func fetchShifts(for date: Date) {
+        isLoading = true
+        error = nil
+        
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: date)
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
@@ -49,35 +58,40 @@ final class CalendarViewModel: ObservableObject {
         
         do {
             let shifts = try shiftUseCase.fetchShifts(descriptor: descriptor)
-            
-            DispatchQueue.main.async {
-                self.shifts = shifts
+            DispatchQueue.main.async { [weak self] in
+                self?.shifts = shifts
+                self?.isLoading = false
             }
-            
         } catch {
-            print("Error fetching shifts: \(error.localizedDescription)")
+            DispatchQueue.main.async { [weak self] in
+                self?.error = error
+                self?.isLoading = false
+            }
         }
     }
     
-    
     func deleteShift(_ shift: Shift) {
+        isLoading = true
+        error = nil
+        
         do {
             try shiftUseCase.deleteShift(shift)
             fetchShifts(for: selectedDate)
             updateUI()
         } catch {
-            print("Error deleting shift: \(error.localizedDescription)")
+            DispatchQueue.main.async { [weak self] in
+                self?.error = error
+                self?.isLoading = false
+            }
         }
     }
     
     func updateUI() {
-        DispatchQueue.main.async {
-            self.needToUpdateUI = true
+        DispatchQueue.main.async { [weak self] in
+            self?.needToUpdateUI = true
         }
     }
-    
 }
-
 
 // Preview 用のViewModel
 extension CalendarViewModel {

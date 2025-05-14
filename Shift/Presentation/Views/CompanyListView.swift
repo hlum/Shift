@@ -38,7 +38,12 @@ extension CompanyListViewModel {
 
 struct CompanyListView: View {
     @StateObject var vm: CompanyListViewModel
-    @Environment(\.modelContext) var modelContext
+    @Environment(\.container) var container
+    
+    
+    init(companyUseCase: CompanyUseCase = MockCompanyUseCase()) {
+        _vm = .init(wrappedValue: .init(companyUseCase: companyUseCase))
+    }
     var body: some View {
         VStack {
             List(vm.companies) { company in
@@ -58,9 +63,7 @@ struct CompanyListView: View {
         }
         .overlay(alignment: .bottom, content: {
             NavigationLink {
-                let repo = SwiftDataCompanyRepo(context: modelContext)
-                let useCase = CompanyUseCase(companyRepository: repo)
-                AddNewCompanyView(companyUseCase: useCase)
+                AddNewCompanyView(companyUseCase: container.companyUseCase)
             } label: {
                 Text("Add Company")
                     .font(.headline)
@@ -78,6 +81,6 @@ struct CompanyListView: View {
 
 #Preview {
     NavigationStack {
-        CompanyListView(vm: CompanyListViewModel.preview())
+        CompanyListView()
     }
 }

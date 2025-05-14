@@ -29,3 +29,33 @@ final class Shift {
 }
 
 
+extension Shift {
+    
+    var salary: Double {
+        let calculator = SalaryCalculator(company: company, shift: self)
+        return calculator.calculateTotalSalary()
+    }
+}
+
+
+
+
+struct Time {
+    let hour: Int
+    let minute: Int
+    
+    init(hour: Int, minute: Int) {
+        self.hour = hour
+        self.minute = minute
+    }
+    
+    init(date: Date) {
+        let calendar = Calendar.current
+        self.hour = calendar.component(.hour, from: date)
+        self.minute = calendar.component(.minute, from: date)
+    }
+    
+    var minutesSinceMidnight: Int {
+        return hour * 60 + minute
+    }
+}

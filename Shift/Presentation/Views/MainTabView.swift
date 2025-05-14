@@ -6,37 +6,40 @@
 //
 
 import SwiftUI
+import SwiftData
 
+@MainActor
 struct MainTabView: View {
-    @Environment(\.modelContext) var modelContext
+    @Environment(\.container) private var container
+    
     var body: some View {
         NavigationStack {
             TabView {
-                let calendarViewModel = CalendarViewModel(
-                    shiftUseCase: ShiftUseCase(
-                        shiftRepository: SwiftDataShiftRepo(
-                            context: modelContext
-                        )
-                    )
-                )
-                CalendarView(vm: calendarViewModel)
+                CalendarView(shiftUseCase: container.shiftUseCase)
                     .tabItem {
                         Image(systemName: "calendar")
                     }
                     .tag(0)
                 
+                SalaryView(shiftUseCase: container.shiftUseCase)
+                    .tabItem {
+                        Image(systemName: "dollarsign")
+                    }
+                    .tag(1)
                 
                 SettingView()
                     .tabItem {
                         Image(systemName: "gear")
                     }
-                    .tag(1)
+                    .tag(2)
             }
         }
-
     }
 }
 
 #Preview {
     MainTabView()
+        .injectDependencies(DependencyContainer(
+            modelContainer: try! ModelContainer(for: Schema([Company.self, Shift.self]))
+        ))
 }

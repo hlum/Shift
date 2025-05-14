@@ -10,31 +10,32 @@ import SwiftData
 
 @main
 struct ShiftApp: App {
-    var sharedModelContainer: ModelContainer = {
+    private let container: ContainerProtocol
+    
+    init() {
         let schema = Schema([
             Company.self,
             Shift.self,
             Holiday.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
+        
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            let modelContainer = try ModelContainer(for: schema, configurations: [modelConfiguration])
+            self.container = DependencyContainer(modelContainer: modelContainer)
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }
-    }()
+    }
     
-
-
     var body: some Scene {
         WindowGroup {
             MainTabView()
+                .injectDependencies(container)
                 .onAppear {
                     print(URL.applicationSupportDirectory.path(percentEncoded: false))
                 }
         }
-        .modelContainer(sharedModelContainer)
-        
+        .modelContainer(container.modelContext.container)
     }
 }
