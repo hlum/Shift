@@ -17,9 +17,9 @@ final class CompanyListViewModel: ObservableObject {
         self.companyUseCase = companyUseCase
     }
     
-    func fetchCompanies() {
-        let companies = companyUseCase.getCompanies()
-        DispatchQueue.main.async {
+    func fetchCompanies() async {
+        let companies = await companyUseCase.getCompanies()
+        await MainActor.run {
             self.companies = companies
         }
     }
@@ -58,8 +58,8 @@ struct CompanyListView: View {
                 }
             }
         }
-        .onAppear {
-            vm.fetchCompanies()
+        .task {
+            await vm.fetchCompanies()
         }
         .overlay(alignment: .bottom, content: {
             NavigationLink {

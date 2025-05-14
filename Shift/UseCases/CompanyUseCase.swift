@@ -16,9 +16,9 @@ class CompanyUseCase {
     }
     
     
-    func getCompanies(descriptor: FetchDescriptor<Company> = FetchDescriptor<Company>()) -> [Company] {
+    func getCompanies(descriptor: FetchDescriptor<Company> = FetchDescriptor<Company>()) async -> [Company] {
         do {
-            let companies = try companyRepository.fetchCompanies(descriptor: descriptor)
+            let companies = try await companyRepository.fetchCompanies(descriptor: descriptor)
             return companies
         } catch {
             Logger.standard.error("Error fetching companies:\(error.localizedDescription)")
@@ -27,8 +27,8 @@ class CompanyUseCase {
     }
     
     
-    func addCompany(_ company: Company) {
-        companyRepository.addCompany(company)
+    func addCompany(_ company: Company) async {
+        await companyRepository.addCompany(company)
     }
     
     

@@ -203,14 +203,14 @@ struct CompanySelectionView: View {
             }
         }
         .navigationTitle("Select Company")
-        .onAppear {
-            fetchCompanies()
+        .task {
+            await fetchCompanies()
         }
     }
     
-    private func fetchCompanies() {
-        let companies = container.companyUseCase.getCompanies()
-        DispatchQueue.main.async {
+    private func fetchCompanies() async {
+        let companies = await container.companyUseCase.getCompanies()
+        await MainActor.run {
             self.companies = companies
         }
     }
