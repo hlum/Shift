@@ -10,28 +10,29 @@ import SwiftData
 
 final class SalaryViewModel: ObservableObject {
     private let shiftUseCase: ShiftUseCase
+    private let holidayUseCase: HolidayUseCase
+    
     @Published var selectedDate: Date = Date()
     @Published var shifts: [Shift] = []
     @Published var totalSalary: Double = 0
+    @Published var isLoading: Bool = false
+    @Published var error: Error?
+    let countryCode: String
     
-    init(shiftUseCase: ShiftUseCase) {
+    init(shiftUseCase: ShiftUseCase, holidayUseCase: HolidayUseCase, countryCode: String?) {
         self.shiftUseCase = shiftUseCase
+        self.holidayUseCase = holidayUseCase
+        self.countryCode = countryCode ?? "US"
     }
     
-    
-    func fetchShifts() {
+    func fetchShifts() async {
+        await MainActor.run { isLoading = true }
+        defer { Task { @MainActor in isLoading = false } }
+        
         let calendar = Calendar.current
-
-        // 🌙 月初め（例：2025-05-01 00:00:00）
-        guard let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: selectedDate)) else {
-            
-            print("Can't get start of month")
-            return
-        }
-
-        // 🌕 翌月の月初め（例：2025-06-01 00:00:00）
-        guard let startOfNextMonth = calendar.date(byAdding: .month, value: 1, to: startOfMonth) else {
-            print("Can't get start of next month")
+        guard let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: selectedDate)),
+              let startOfNextMonth = calendar.date(byAdding: .month, value: 1, to: startOfMonth) else {
+            await MainActor.run { error = SalaryError.invalidDate }
             return
         }
         
@@ -39,33 +40,53 @@ final class SalaryViewModel: ObservableObject {
             shift.startTime >= startOfMonth && shift.startTime < startOfNextMonth
         }
         
-        
-        let descriptor = FetchDescriptor<Shift>(predicate: predicate)
         do {
-            let shifts = try shiftUseCase.fetchShifts(descriptor: descriptor)
-            DispatchQueue.main.async {
-                self.shifts = shifts
-                self.getTotalSalary()
-            }
+            let descriptor = FetchDescriptor<Shift>(predicate: predicate)
+            let fetchedShifts = try shiftUseCase.fetchShifts(descriptor: descriptor)
+            await MainActor.run { self.shifts = fetchedShifts }
+            await calculateTotalSalary(for: fetchedShifts)
         } catch {
-            print("Error fetching shifts: \(error.localizedDescription)")
+            await MainActor.run { self.error = error }
         }
     }
     
-    
-    func getTotalSalary() {
-        totalSalary = 0
+    @MainActor
+    private func calculateTotalSalary(for shifts: [Shift]) async {
         guard !shifts.isEmpty else {
+            totalSalary = 0
             return
         }
-        var total = 0.0
-        for shift in shifts {
-            total += shift.salary
-        }
-        DispatchQueue.main.async {
-            self.totalSalary = total
-        }
         
+        do {
+            let salaries = try await withThrowingTaskGroup(of: Double.self) { group in
+                for shift in shifts {
+                    group.addTask {
+                        try await shift.getSalary(holidayUseCase: self.holidayUseCase, countryCode: self.countryCode)
+                    }
+                }
+                
+                var total: Double = 0
+                for try await salary in group {
+                    total += salary
+                }
+                return total
+            }
+            
+            totalSalary = salaries
+        } catch {
+            self.error = error
+        }
+    }
+}
+
+enum SalaryError: LocalizedError {
+    case invalidDate
+    
+    var errorDescription: String? {
+        switch self {
+        case .invalidDate:
+            return "Invalid date range for salary calculation"
+        }
     }
 }
 
@@ -74,8 +95,8 @@ struct SalaryView: View {
     @StateObject var vm: SalaryViewModel
     @Environment(\.locale) private var locale
     
-    init(shiftUseCase: ShiftUseCase = MockShiftUseCase()) {
-        _vm = StateObject(wrappedValue: SalaryViewModel(shiftUseCase: shiftUseCase))
+    init(shiftUseCase: ShiftUseCase = MockShiftUseCase(), holidayUseCase: HolidayUseCase = MockHolidayUseCase(), locale: Locale? = .current) {
+        _vm = StateObject(wrappedValue: SalaryViewModel(shiftUseCase: shiftUseCase, holidayUseCase: holidayUseCase, countryCode: locale?.region?.identifier))
     }
     
     var body: some View {
@@ -83,30 +104,41 @@ struct SalaryView: View {
             title()
             Spacer()
             
-            HStack {
-                Image(systemName: "lessthan.circle")
-                    .onTapGesture {
-                        let lastMonth = Calendar.current.date(byAdding: .month, value: -1, to: vm.selectedDate)!
-                        vm.selectedDate = lastMonth
-                        vm.fetchShifts()
-                    }
-                Spacer()
-                
-                Text("\(vm.totalSalary)")
-                
-                Spacer()
-                Image(systemName: "greaterthan.circle")
-                    .onTapGesture {
-                        let nextMonth = Calendar.current.date(byAdding: .month, value: 1, to: vm.selectedDate)!
-                        vm.selectedDate = nextMonth
-                        vm.fetchShifts()
-                    }
+            if vm.isLoading {
+                ProgressView()
+            } else if let error = vm.error {
+                Text(error.localizedDescription)
+                    .foregroundColor(.red)
+            } else {
+                HStack {
+                    Image(systemName: "lessthan.circle")
+                        .onTapGesture {
+                            Task {
+                                let lastMonth = Calendar.current.date(byAdding: .month, value: -1, to: vm.selectedDate)!
+                                vm.selectedDate = lastMonth
+                                await vm.fetchShifts()
+                            }
+                        }
+                    Spacer()
+                    
+                    Text("\(vm.totalSalary)")
+                    
+                    Spacer()
+                    Image(systemName: "greaterthan.circle")
+                        .onTapGesture {
+                            Task {
+                                let nextMonth = Calendar.current.date(byAdding: .month, value: 1, to: vm.selectedDate)!
+                                vm.selectedDate = nextMonth
+                                await vm.fetchShifts()
+                            }
+                        }
+                }
             }
             
             Spacer()
         }
-        .onAppear {
-            vm.fetchShifts()
+        .task {
+            await vm.fetchShifts()
         }
     }
     

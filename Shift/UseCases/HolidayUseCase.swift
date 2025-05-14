@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class HolidayUseCase {
+class HolidayUseCase {
     private let holidayRepository: HolidayRepository
     
     init(holidayRepository: HolidayRepository) {
@@ -21,4 +21,13 @@ final class HolidayUseCase {
     func fetchHoliday(for date: Date, countryCode: String) async throws -> [Holiday] {
         return try await holidayRepository.fetchHolidays(for: date, countryCode: countryCode)
     }
+    
+    
 }
+
+class MockHolidayUseCase: HolidayUseCase {
+    init() {
+        super.init(holidayRepository: MockHolidayRepo())
+    }
+}
+

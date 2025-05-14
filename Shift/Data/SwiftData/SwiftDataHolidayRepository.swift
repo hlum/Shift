@@ -19,12 +19,20 @@ final class SwiftDataHolidayRepository: HolidayRepository {
     func fetchHolidays(for date: Date, countryCode: String) async throws -> [Holiday] {
         
         let currentYear = calendar.component(.year, from: date)
-        
         try await checkAndLoadHolidaysLastCurrentNextYear(for: currentYear, countryCode: countryCode)
         
         
+        let day = calendar.component(.day, from: date)
+        guard let startOfDay = calendar.date(from: DateComponents(day: day, hour: 0, minute: 0, second: 0)),
+              let startOfTomorrow = calendar.date(from: DateComponents(day: day + 1, hour: 0, minute: 0,second: 0)) else {
+            print("Can't create startOfDay or startOfTomorrow")
+            return []
+        }
+
+        
         let predicate = #Predicate<Holiday> { holiday in
-            holiday.date == date
+            holiday.date >= startOfDay && holiday.date < startOfTomorrow &&
+            holiday.countryCode == countryCode
         }
         
         let descriptor = FetchDescriptor<Holiday>(predicate: predicate)
@@ -50,7 +58,7 @@ extension SwiftDataHolidayRepository {
         let (last, current, next) = try await isAllThreeYearHolidayDataLoaded(currentYear: year)
         
         if last && current && next {
-            print("All three year holiday data already loaded for year: \(year)")
+            print("All three year holiday data already loaded for year: \(year) \(countryCode)")
             return
         }
         
@@ -115,7 +123,7 @@ extension SwiftDataHolidayRepository {
             context.insert(model)
             holidays.append(model)
         }
-        
+        print("holidays saved to swiftData count: \(holidays.count)")
         try context.save()
         return holidays
     }
