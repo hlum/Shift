@@ -14,7 +14,7 @@ struct FSCalendarView: UIViewRepresentable {
     @Binding var selectedDate: Date
     @Binding var needToUpdateUI: Bool
     @Binding var publicHolidays: [Holiday]
-    @Binding var shiftsForSelectedDate: [Shift]
+    @Binding var shifts: [Shift]
     @Environment(\.container) private var container
     @Environment(\.locale) private var locale
 
@@ -70,7 +70,6 @@ struct FSCalendarView: UIViewRepresentable {
         var shiftUseCase: ShiftUseCase
         var holidayUseCase: HolidayUseCase
         let dateFormatter = DateFormatter()
-        
 
         
         init(parent: FSCalendarView, shiftUseCase: ShiftUseCase, holidayUseCase: HolidayUseCase) {
@@ -95,8 +94,8 @@ struct FSCalendarView: UIViewRepresentable {
         
         
         func calendar(_ calendar: FSCalendar, numberOfEventsFor date: Date) -> Int {
-            return parent.shiftsForSelectedDate.count
+            let shiftsForDate = parent.shifts.filter { Calendar.current.isDate($0.startTime, inSameDayAs: date) }
+            return shiftsForDate.count
         }
-        
     }
 }

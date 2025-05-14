@@ -11,7 +11,10 @@ import Combine
 
 final class CalendarViewModel: ObservableObject {
     @Published var selectedDate: Date = Date()
+    
     @Published var shifts: [Shift] = []
+    @Published var allShifts: [Shift] = []
+    
     @Published var holidaysForSelectedDate: [Holiday] = []
     @Published var publicHolidays: [Holiday] = []
     
@@ -30,7 +33,12 @@ final class CalendarViewModel: ObservableObject {
         self.shiftUseCase = shiftUseCase
         self.holidayUseCase = holidayUseCase
         self.addListenerToSelectedDate()
+
+        Task {
+            await fetchAllShifts()
+        }
         fetchAllHolidays()
+
     }
     
     deinit {
@@ -43,15 +51,32 @@ final class CalendarViewModel: ObservableObject {
         $selectedDate
             .sink { [weak self] date in
                 Task {
-                    await self?.fetchShifts(for: date)
-                    await self?.fetchHolidays(for: date)
+                    await self?.getShift(for: date)
+                    await self?.getHoliday(for: date)
                 }
             }
             .store(in: &cancellables)
     }
     
     @MainActor
-    func fetchShifts(for date: Date) async {
+    func fetchAllShifts() async {
+        isLoading = true
+        error = nil
+        
+        do {
+            self.allShifts = try await shiftUseCase.fetchShifts()
+            self.isLoading = false
+            self.error = nil
+        } catch {
+            self.error = error
+            self.isLoading = false
+            print("Error fetching shifts: \(error.localizedDescription)")
+        }
+        
+    }
+    
+    @MainActor
+    func getShift(for date: Date) {
         isLoading = true
         error = nil
         
@@ -59,25 +84,18 @@ final class CalendarViewModel: ObservableObject {
         let startOfDay = calendar.startOfDay(for: date)
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
         
-        let predicate = #Predicate<Shift> { shift in
+        self.shifts = allShifts.filter { shift in
             shift.startTime >= startOfDay && shift.startTime < endOfDay
         }
         
-        let descriptor = FetchDescriptor(predicate: predicate)
-        
-        do {
-            let shifts = try await shiftUseCase.fetchShifts(descriptor: descriptor)
-            self.shifts = shifts
-            self.isLoading = false
-            
-        } catch {
-            self.error = error
-            self.isLoading = false
-            
-        }
     }
     
-    
+    @MainActor
+    func getHoliday(for date: Date) {
+        self.holidaysForSelectedDate = publicHolidays.filter({ item in
+            Calendar.current.isDate(item.date, inSameDayAs: date)
+        })
+    }
     
     func fetchAllHolidays() {
         Task { @MainActor in
@@ -87,21 +105,14 @@ final class CalendarViewModel: ObservableObject {
     }
     
     
-    func fetchHolidays(for date: Date) async {
-        let holidaysForSelectedDate = await holidayUseCase.fetchHoliday(for: date)
-        await MainActor.run {
-            self.holidaysForSelectedDate = holidaysForSelectedDate
-        }
-        self.updateUI()
-    }
-    
     func deleteShift(_ shift: Shift) async {
         isLoading = true
         error = nil
         
         do {
             try await shiftUseCase.deleteShift(shift)
-            await fetchShifts(for: selectedDate)
+            await getShift(for: selectedDate)
+            await fetchAllShifts()
             updateUI()
         } catch {
             await MainActor.run { [weak self] in

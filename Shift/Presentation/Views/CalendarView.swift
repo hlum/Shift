@@ -30,7 +30,7 @@ struct CalendarView: View {
                 selectedDate: $vm.selectedDate,
                 needToUpdateUI: $vm.needToUpdateUI,
                 publicHolidays: $vm.publicHolidays,
-                shiftsForSelectedDate: $vm.shifts
+                shifts: $vm.allShifts
             )
             .frame(maxWidth: .infinity)
 
@@ -42,7 +42,6 @@ struct CalendarView: View {
                 List {
                     ForEach(vm.holidaysForSelectedDate) { holiday in
                         Text(holiday.name).foregroundStyle(.red)
-                        Text(holiday.date.description)
                     }
                     ForEach(vm.shifts) { shift in
                         ShiftSubView(shift: shift)
@@ -78,7 +77,8 @@ struct CalendarView: View {
         .fullScreenCover(isPresented: $vm.showAddShiftView) {
             // On Dismiss
             Task { @MainActor in
-                await vm.fetchShifts(for: vm.selectedDate)
+                await vm.fetchAllShifts()
+                vm.getShift(for: vm.selectedDate)
                 vm.updateUI()
             }
         } content: {
