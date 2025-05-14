@@ -10,16 +10,39 @@ import Foundation
 class HolidayUseCase {
     private let holidayRepository: HolidayRepository
     
-    init(holidayRepository: HolidayRepository) {
+    private var publicHolidays: [Holiday] = []
+    private let countryCode: String
+    
+    init(holidayRepository: HolidayRepository, countryCode: String) {
         self.holidayRepository = holidayRepository
+        self.countryCode = countryCode
+        Task { @MainActor in
+            await self.loadPublicHolidays()
+        }
     }
     
-    func fetchHolidays(countryCode: String) async throws -> [Holiday] {
-        return try await holidayRepository.fetchHolidays(countryCode: countryCode)
+    @MainActor
+    private func loadPublicHolidays() async {
+        do {
+            self.publicHolidays = try await holidayRepository.fetchHolidays(countryCode: countryCode)
+        } catch {
+            Logger.standard.error("Error loading public holidays: \(error.localizedDescription)")
+        }
     }
     
-    func fetchHoliday(for date: Date, countryCode: String) async throws -> [Holiday] {
-        return try await holidayRepository.fetchHolidays(for: date, countryCode: countryCode)
+    func fetchHolidays() async throws -> [Holiday] {
+        return self.publicHolidays
+    }
+    
+    func fetchHoliday(for date: Date) async throws -> [Holiday] {
+        let result = publicHolidays.filter { holiday in
+            Calendar.current.isDate(holiday.date, inSameDayAs: date)
+        }
+        return result
+    }
+    
+    func isWeekend(_ date: Date) -> Bool {
+        return Calendar.current.isDateInWeekend(date)
     }
     
     
@@ -27,7 +50,7 @@ class HolidayUseCase {
 
 class MockHolidayUseCase: HolidayUseCase {
     init() {
-        super.init(holidayRepository: MockHolidayRepo())
+        super.init(holidayRepository: MockHolidayRepo(), countryCode: "JP")
     }
 }
 

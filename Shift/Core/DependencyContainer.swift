@@ -48,7 +48,7 @@ final class DependencyContainer: ContainerProtocol {
     }
     
     var holidayUseCase: HolidayUseCase {
-        HolidayUseCase(holidayRepository: holidayRepository)
+        HolidayUseCase(holidayRepository: holidayRepository, countryCode: Locale.current.region?.identifier ?? "US")
     }
 }
 
