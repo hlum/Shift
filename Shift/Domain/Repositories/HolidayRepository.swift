@@ -8,6 +8,6 @@
 import Foundation
 
 protocol HolidayRepository {
-    func fetchHolidays(for year: Int, countryCode: String) async throws -> [Holiday]
-    func isHolidayDataLoaded(for year: Int) async throws -> Bool
+    func fetchHolidays(for date: Date, countryCode: String) async throws -> [Holiday]
+    func fetchHolidays(countryCode: String) async throws -> [Holiday]
 }
