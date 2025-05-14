@@ -94,7 +94,7 @@ struct FSCalendarView: UIViewRepresentable {
                 let shifts = try shiftUseCase.fetchShifts(descriptor: descriptor)
                 return shifts.count
             } catch {
-                print("Can't fetch shifts: \(error.localizedDescription)")
+                Logger.standard.error("Can't fetch shifts: \(error.localizedDescription)")
                 return 0
             }
         }

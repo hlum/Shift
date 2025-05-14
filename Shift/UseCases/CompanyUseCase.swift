@@ -21,7 +21,7 @@ class CompanyUseCase {
             let companies = try companyRepository.fetchCompanies(descriptor: descriptor)
             return companies
         } catch {
-            print(error.localizedDescription)
+            Logger.standard.error("Error fetching companies:\(error.localizedDescription)")
             return []
         }
     }
