@@ -6,3 +6,5 @@ Shift.xcodeproj/project.pbxproj
 Shift.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
 *.resolved
+
+*.xcbkptlist
