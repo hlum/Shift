@@ -19,7 +19,7 @@ final class SwiftDataHolidayRepository: HolidayRepository {
     
     @MainActor
     func fetchHolidays(for date: Date, countryCode: String) async throws -> [Holiday] {
-        
+        print("Country Code: \(countryCode)")
         let currentYear = calendar.component(.year, from: date)
         try await checkAndLoadHolidaysLastCurrentNextYear(for: currentYear, countryCode: countryCode)
         
@@ -46,8 +46,10 @@ final class SwiftDataHolidayRepository: HolidayRepository {
     func fetchHolidays(countryCode: String) async throws -> [Holiday] {
         let currentYear = calendar.component(.year, from: Date())
         try await checkAndLoadHolidaysLastCurrentNextYear(for: currentYear, countryCode: countryCode)
-        
-        let descriptor = FetchDescriptor<Holiday>()
+        let predicate = #Predicate<Holiday> { holiday in
+            holiday.countryCode == countryCode
+        }
+        let descriptor = FetchDescriptor<Holiday>(predicate: predicate)
         return try context.fetch(descriptor)
     }
     
@@ -57,7 +59,7 @@ final class SwiftDataHolidayRepository: HolidayRepository {
 
 extension SwiftDataHolidayRepository {
     private func checkAndLoadHolidaysLastCurrentNextYear(for year: Int, countryCode: String) async throws  {
-        let (last, current, next) = try await isAllThreeYearHolidayDataLoaded(currentYear: year)
+        let (last, current, next) = try await isAllThreeYearHolidayDataLoaded(currentYear: year, countryCode: countryCode)
         
         if last && current && next {
             Logger.standard.info("All three year holiday data already loaded for year: \(year) \(countryCode)")
@@ -73,16 +75,16 @@ extension SwiftDataHolidayRepository {
         try await saveHolidaysToLocalStorage(apiResponse: holidays)
     }
     
-    private func isAllThreeYearHolidayDataLoaded(currentYear: Int) async throws -> (Bool, Bool, Bool) {
+    private func isAllThreeYearHolidayDataLoaded(currentYear: Int, countryCode: String) async throws -> (Bool, Bool, Bool) {
         return (
-            try await holidayDataLoaded(for: currentYear - 1),
-            try await holidayDataLoaded(for: currentYear),
-            try await holidayDataLoaded(for: currentYear + 1)
+            try await holidayDataLoaded(for: currentYear - 1, countryCode: countryCode),
+            try await holidayDataLoaded(for: currentYear, countryCode: countryCode),
+            try await holidayDataLoaded(for: currentYear + 1, countryCode: countryCode)
         )
     }
 
 
-    private func holidayDataLoaded(for year: Int) async throws -> Bool {
+    private func holidayDataLoaded(for year: Int, countryCode: String) async throws -> Bool {
         guard
             let startOfYear = calendar.date(from: DateComponents(year: year, month: 1, day: 1)),
             let startOfNextYear = calendar.date(from: DateComponents(year: year + 1, month: 1, day: 1))
@@ -91,7 +93,8 @@ extension SwiftDataHolidayRepository {
         }
         
         let predicate = #Predicate<Holiday> { holiday in
-             holiday.date >= startOfYear && holiday.date < startOfNextYear
+             holiday.date >= startOfYear && holiday.date < startOfNextYear &&
+            holiday.countryCode == countryCode
          }
         
         let descriptor = FetchDescriptor<Holiday>(predicate: predicate)
