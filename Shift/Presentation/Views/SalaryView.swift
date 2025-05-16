@@ -113,7 +113,9 @@ struct SalaryView: View {
                     .foregroundColor(.red)
             } else {
                 Button {
-                    vm.showDesiredSalaryInput = true
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        vm.showDesiredSalaryInput = true
+                    }
                 } label: {
                     VStack {
                         Text("Desired salary")
@@ -167,103 +169,109 @@ struct SalaryView: View {
         }
         .overlay(alignment: .center, content: {
             if vm.showDesiredSalaryInput {
-                VStack(spacing: 20) {
-                    // Header
-                    HStack {
-                        Text("Set Desired Salary")
-                            .font(.title2.bold())
-                        Spacer()
-                        Button {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                vm.showDesiredSalaryInput = false
-                            }
-                        } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .font(.title2)
-                                .foregroundStyle(.gray)
-                                .contentTransition(.symbolEffect(.replace))
-                        }
-                    }
-                    .padding(.horizontal)
-                    
-                    // Input Section
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Annual Salary")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                        
-                        HStack {
-                            Text("$")
-                                .font(.title2.bold())
-                                .foregroundStyle(.secondary)
-                            
-                            TextField("Enter amount", text: Binding(
-                                get: { String(vm.desiredSalary) },
-                                set: { newValue in
-                                    // Only allow numbers
-                                    let filtered = newValue.filter { "0123456789".contains($0) }
-                                    if let newValueInt = Int(filtered) {
-                                        vm.desiredSalary = newValueInt
-                                    } else {
-                                        vm.desiredSalary = 0
-                                    }
-                                }
-                            ))
-                            .font(.title2.bold())
-                            .keyboardType(.numberPad)
-                            .textFieldStyle(.plain)
-                        }
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(12)
-                    }
-                    .padding(.horizontal)
-                    
-                    // Action Buttons
-                    HStack(spacing: 16) {
-                        Button {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                vm.showDesiredSalaryInput = false
-                            }
-                        } label: {
-                            Text("Cancel")
-                                .font(.headline)
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color(.systemGray5))
-                                .foregroundStyle(.primary)
-                                .cornerRadius(12)
-                        }
-                        
-                        Button {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                vm.showDesiredSalaryInput = false
-                            }
-                        } label: {
-                            Text("Save")
-                                .font(.headline)
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.accentColor)
-                                .foregroundStyle(.white)
-                                .cornerRadius(12)
-                        }
-                    }
-                    .padding(.horizontal)
-                }
-                .padding(.vertical, 24)
-                .background(
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(Color(.systemBackground))
-                        .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: 10)
-                )
-                .padding(.horizontal, 24)
-                .transition(.scale.combined(with: .opacity))
+                desiredSalaryInputView
             }
         })
         .task {
             await vm.fetchShifts()
         }
+    }
+    
+    
+    private var desiredSalaryInputView: some View {
+        VStack(spacing: 20) {
+            // Header
+            HStack {
+                Text("Set Desired Salary")
+                    .font(.title2.bold())
+                Spacer()
+                Button {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        vm.showDesiredSalaryInput = false
+                    }
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(.gray)
+                        .contentTransition(.symbolEffect(.replace))
+                }
+            }
+            .padding(.horizontal)
+            
+            // Input Section
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Annual Salary")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                
+                HStack {
+                    Text("$")
+                        .font(.title2.bold())
+                        .foregroundStyle(.secondary)
+                    
+                    TextField("Enter amount", text: Binding(
+                        get: { String(vm.desiredSalary) },
+                        set: { newValue in
+                            // Only allow numbers
+                            let filtered = newValue.filter { "0123456789".contains($0) }
+                            if let newValueInt = Int(filtered) {
+                                vm.desiredSalary = newValueInt
+                            } else {
+                                vm.desiredSalary = 0
+                            }
+                        }
+                    ))
+                    .font(.title2.bold())
+                    .keyboardType(.numberPad)
+                    .textFieldStyle(.plain)
+                }
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(12)
+            }
+            .padding(.horizontal)
+            
+            // Action Buttons
+            HStack(spacing: 16) {
+                Button {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        vm.showDesiredSalaryInput = false
+                    }
+                } label: {
+                    Text("Cancel")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color(.systemGray5))
+                        .foregroundStyle(.red)
+                        .cornerRadius(12)
+                }
+                
+                Button {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        vm.showDesiredSalaryInput = false
+                    }
+                } label: {
+                    Text("Save")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.accentColor)
+                        .foregroundStyle(.white)
+                        .cornerRadius(12)
+                }
+            }
+            .padding(.horizontal)
+        }
+        .padding(.vertical, 24)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color(.systemBackground))
+                .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: 10)
+        )
+        .padding(.horizontal, 24)
+        .transition(.scale.combined(with: .opacity))
+
     }
     
     func title() -> some View {
