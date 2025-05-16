@@ -48,6 +48,9 @@
 				Domain/Repositories/CompanyRepository.swift,
 				Domain/Repositories/HolidayRepository.swift,
 				Domain/Repositories/ShiftRepository.swift,
+				UseCases/CompanyUseCase.swift,
+				UseCases/HolidayUseCase.swift,
+				UseCases/ShiftUseCase.swift,
 			);
 			target = 7F0D75922DD70FD50061261B /* ShiftTests */;
 		};
