@@ -34,6 +34,11 @@ final class SalaryCalculator {
             latePlusRate = Double(lateRate - baseSalary)
         }
         
+        var overtimePlusRate = 0.0
+        if let overtimeRate = overtimeSalary {
+            overtimePlusRate = Double(overtimeRate - baseSalary)
+        }
+        
         // Add transportation expense
         totalSalary += Double(transportationExpense)
         
@@ -75,8 +80,7 @@ final class SalaryCalculator {
         let overtimePay = calculateOvertimePay(
             shiftName: shiftName,
             hoursWorked: hoursWorked,
-            baseRate: baseRate,
-            overtimeSalary: overtimeSalary,
+            overtimePlusRate: overtimePlusRate,
             baseWorkHours: baseWorkHours
             
         )
@@ -110,18 +114,16 @@ final class SalaryCalculator {
     private func calculateOvertimePay(
         shiftName: String,
         hoursWorked: Double,
-        baseRate: Double,
-        overtimeSalary: Int?,
+        overtimePlusRate: Double,
         baseWorkHours: Double?
     ) -> Double {
-        guard let overtimeRate = overtimeSalary else { return 0.0 }
         
         if hoursWorked <= baseWorkHours ?? 0 { return 0.0 }
         
         let overtimeHours = hoursWorked - (baseWorkHours ?? 0)
-        let overtimePayRate = Double(overtimeRate) - baseRate
+        
         debug(for: shiftName, "OverTime Hours: \(overtimeHours)")
-        return overtimePayRate * overtimeHours
+        return overtimePlusRate * overtimeHours
     }
     
     
