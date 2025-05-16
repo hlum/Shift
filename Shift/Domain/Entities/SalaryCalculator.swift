@@ -20,15 +20,19 @@ final class SalaryCalculator {
         paymentType: PaymentType,
         shiftStartTime: Date,
         shiftEndTime: Date,
-        baseWorkHours: Double,
-        overtimeSalary: Double?,
+        baseWorkHours: Double?,
+        overtimeSalary: Int?,
         breakDuration: Double,
-        companyHasHolidaySalary: Bool,
-        holidaySalary: Int,
+        holidaySalary: Int?,
         lateSalary: LateSalary?,
-        holidayUseCase: HolidayUseCase
+        isHoliday: Bool
     ) async throws -> Double {
         var totalSalary: Double = 0
+        
+        var latePlusRate = 0.0
+        if let lateRate = lateSalary?.lateSalary {
+            latePlusRate = Double(lateRate - baseSalary)
+        }
         
         // Add transportation expense
         totalSalary += Double(transportationExpense)
@@ -55,15 +59,10 @@ final class SalaryCalculator {
             breakDuration: breakDuration
         )
 
-        
-        // Check if the shift date is a holiday
-        let holidays = await holidayUseCase.fetchHoliday(for: roundedStartTime)
-        let isHoliday = !holidays.isEmpty && holidayUseCase.isWeekend(roundedStartTime)
-        
         debug(for: shiftName, "isHoliday: \(isHoliday)")
         
-        let baseRate = companyHasHolidaySalary && isHoliday ?
-            Double(holidaySalary) :
+        let baseRate = holidaySalary != nil && isHoliday ?
+            Double(holidaySalary!) :
             Double(baseSalary)
         
         debug(for: shiftName, "baseRate: \(baseRate)")
@@ -92,8 +91,9 @@ final class SalaryCalculator {
             shiftName: shiftName,
             shiftStart: roundedStartTime,
             shiftEnd: roundedEndTime,
-            baseRate: baseRate,
-            lateSalary: lateSalary
+            lateStart: lateSalary?.startTime,
+            lateEnd: lateSalary?.endTime,
+            latePlusRate: latePlusRate
         )
         debug(for: shiftName, "lateNightPay: \(lateNightSalary)")
 
@@ -111,14 +111,14 @@ final class SalaryCalculator {
         shiftName: String,
         hoursWorked: Double,
         baseRate: Double,
-        overtimeSalary: Double?,
-        baseWorkHours: Double
+        overtimeSalary: Int?,
+        baseWorkHours: Double?
     ) -> Double {
         guard let overtimeRate = overtimeSalary else { return 0.0 }
         
-        if hoursWorked <= baseWorkHours { return 0.0 }
+        if hoursWorked <= baseWorkHours ?? 0 { return 0.0 }
         
-        let overtimeHours = hoursWorked - baseWorkHours
+        let overtimeHours = hoursWorked - (baseWorkHours ?? 0)
         let overtimePayRate = Double(overtimeRate) - baseRate
         debug(for: shiftName, "OverTime Hours: \(overtimeHours)")
         return overtimePayRate * overtimeHours
@@ -130,15 +130,13 @@ final class SalaryCalculator {
         shiftName: String,
         shiftStart: Date,
         shiftEnd: Date,
-        baseRate: Double,
-        lateSalary: LateSalary?
+        lateStart: Date?,
+        lateEnd: Date?,
+        latePlusRate: Double
     ) -> Double {
-        guard let lateSalary,
-              let lateAmount = lateSalary.lateSalary,
-              let lateStart = lateSalary.startTime,
-              let lateEnd = lateSalary.endTime else {
-            return 0
-        }
+        guard let lateStart,
+              let lateEnd
+        else { return 0.0 }
         
         let lateStartTime = Time(date: lateStart)
         let lateEndTime = Time(date: lateEnd)
@@ -150,10 +148,7 @@ final class SalaryCalculator {
             lateStart: lateStartTime,
             lateEnd: lateEndTime
         )
-        
-        let lateNightRate = Double(lateAmount) - baseRate
-
-        return Double(lateNightRate) * lateNightHours
+        return latePlusRate * lateNightHours
     }
     
     

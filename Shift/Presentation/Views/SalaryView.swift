@@ -54,6 +54,7 @@ final class SalaryViewModel: ObservableObject {
     
     @MainActor
     private func calculateTotalSalary(for shifts: [Shift]) async {
+        let salaryCalculator = SalaryCalculator()
         guard !shifts.isEmpty else {
             totalSalary = 0
             return
@@ -62,8 +63,28 @@ final class SalaryViewModel: ObservableObject {
         do {
             let salaries = try await withThrowingTaskGroup(of: Double.self) { group in
                 for shift in shifts {
+                    let company = shift.company
+                    let salary = company.salary
+                    
+                    // Check if the shift date is a holiday
+                    let holidays = await holidayUseCase.fetchHoliday(for: shift.startTime)
+                    let isHoliday = !holidays.isEmpty || holidayUseCase.isWeekend(shift.startTime)
+                    
                     group.addTask { @MainActor in
-                        try await shift.getSalary(holidayUseCase: self.holidayUseCase, countryCode: self.countryCode)
+                        try await salaryCalculator.calculateTotalSalary(
+                            shiftName: shift.name,
+                            baseSalary: salary.baseSalary,
+                            transportationExpense: salary.transportationExpense,
+                            paymentType: salary.paymentType,
+                            shiftStartTime: shift.startTime,
+                            shiftEndTime: shift.endTime,
+                            baseWorkHours: salary.overtimeSalary?.baseWorkHours,
+                            overtimeSalary: salary.overtimeSalary?.overtimePayRate,
+                            breakDuration: shift.breakDuration,
+                            holidaySalary: salary.holidaySalary,
+                            lateSalary: salary.lateSalary,
+                            isHoliday: isHoliday
+                        )
                     }
                 }
                 
