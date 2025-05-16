@@ -43,7 +43,7 @@ struct CalendarView: View {
                     ForEach(vm.holidaysForSelectedDate) { holiday in
                         Text(holiday.name).foregroundStyle(.red)
                     }
-                    ForEach(vm.shifts) { shift in
+                    ForEach(vm.shiftsForSelectedDate) { shift in
                         ShiftSubView(shift: shift)
                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                 Button {
@@ -78,7 +78,7 @@ struct CalendarView: View {
             // On Dismiss
             Task { @MainActor in
                 await vm.fetchAllShifts()
-                vm.getShift(for: vm.selectedDate)
+                vm.getShiftForSelectedDate(for: vm.selectedDate)
                 vm.updateUI()
             }
         } content: {

@@ -12,7 +12,7 @@ import Combine
 final class CalendarViewModel: ObservableObject {
     @Published var selectedDate: Date = Date()
     
-    @Published var shifts: [Shift] = []
+    @Published var shiftsForSelectedDate: [Shift] = []
     @Published var allShifts: [Shift] = []
     
     @Published var holidaysForSelectedDate: [Holiday] = []
@@ -36,6 +36,7 @@ final class CalendarViewModel: ObservableObject {
 
         Task {
             await fetchAllShifts()
+            await self.getShiftForSelectedDate(for: Date())
         }
         fetchAllHolidays()
 
@@ -51,7 +52,7 @@ final class CalendarViewModel: ObservableObject {
         $selectedDate
             .sink { [weak self] date in
                 Task {
-                    await self?.getShift(for: date)
+                    await self?.getShiftForSelectedDate(for: date)
                     await self?.getHoliday(for: date)
                 }
             }
@@ -76,7 +77,7 @@ final class CalendarViewModel: ObservableObject {
     }
     
     @MainActor
-    func getShift(for date: Date) {
+    func getShiftForSelectedDate(for date: Date) {
         isLoading = true
         error = nil
         
@@ -84,7 +85,7 @@ final class CalendarViewModel: ObservableObject {
         let startOfDay = calendar.startOfDay(for: date)
         let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
         
-        self.shifts = allShifts.filter { shift in
+        self.shiftsForSelectedDate = allShifts.filter { shift in
             shift.startTime >= startOfDay && shift.startTime < endOfDay
         }
         
@@ -110,10 +111,12 @@ final class CalendarViewModel: ObservableObject {
         error = nil
         
         do {
-            try await shiftUseCase.deleteShift(shift)
-            await getShift(for: selectedDate)
-            await fetchAllShifts()
-            updateUI()
+            Task {
+                try await shiftUseCase.deleteShift(shift)
+                await fetchAllShifts()
+                getShiftForSelectedDate(for: selectedDate)
+                updateUI()
+            }
         } catch {
             await MainActor.run { [weak self] in
                 self?.error = error
