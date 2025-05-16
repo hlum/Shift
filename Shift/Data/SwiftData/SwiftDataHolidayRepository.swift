@@ -23,10 +23,10 @@ final class SwiftDataHolidayRepository: HolidayRepository {
         let currentYear = calendar.component(.year, from: date)
         try await checkAndLoadHolidaysLastCurrentNextYear(for: currentYear, countryCode: countryCode)
         
+        let components = calendar.dateComponents([.year, .month, .day], from: date)
         
-        let day = calendar.component(.day, from: date)
-        guard let startOfDay = calendar.date(from: DateComponents(day: day, hour: 0, minute: 0, second: 0)),
-              let startOfTomorrow = calendar.date(from: DateComponents(day: day + 1, hour: 0, minute: 0,second: 0)) else {
+        guard let startOfDay = calendar.date(from: DateComponents(year: components.year ,month: components.month, day: components.day, hour: 0, minute: 0, second: 0)),
+              let startOfTomorrow = calendar.date(from: DateComponents(year: components.year ,month: components.month, day: components.day! + 1, hour: 0, minute: 0,second: 0)) else {
             Logger.standard.fault("Can't create startOfDay or startOfTomorrow")
             return []
         }
