@@ -104,7 +104,7 @@ final class CalendarViewModel: ObservableObject {
         }
     }
     
-    
+    @MainActor
     func deleteShift(_ shift: Shift) async {
         isLoading = true
         error = nil

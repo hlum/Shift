@@ -60,7 +60,7 @@ final class SalaryViewModel: ObservableObject {
         do {
             let salaries = try await withThrowingTaskGroup(of: Double.self) { group in
                 for shift in shifts {
-                    group.addTask {
+                    group.addTask { @MainActor in
                         try await shift.getSalary(holidayUseCase: self.holidayUseCase, countryCode: self.countryCode)
                     }
                 }
