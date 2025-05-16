@@ -28,18 +28,13 @@ final class Shift {
     }
 }
 
-
 extension Shift {
-    
+    @MainActor
     func getSalary(holidayUseCase: HolidayUseCase, countryCode: String) async throws -> Double {
         let salaryCalculator = SalaryCalculator(company: company, shift: self, holidayUseCase: holidayUseCase, countryCode: countryCode)
-        
         return try await salaryCalculator.calculateTotalSalary()
     }
 }
-
-
-
 
 struct Time {
     let hour: Int
