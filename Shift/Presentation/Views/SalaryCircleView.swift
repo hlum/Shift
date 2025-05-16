@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct SalaryCircleView: View {
-    let desiredSalary: Int
-    let salary: Int
+    @Binding var desiredSalary: Int
+    @Binding var salary: Double
     var body: some View {
         VStack {
             ZStack {
@@ -24,16 +24,16 @@ struct SalaryCircleView: View {
                 VStack {
                     Text("Expected Salary")
                     
-                    Text("\(salary) $")
+                    Text("\(Int(salary)) $")
                         .font(.system(size: 30, weight: .bold, design: .default))
                     
                 }
             }
         }
-        .padding(.horizontal, 60)
+        .padding(.horizontal, 10)
     }
 }
 
 #Preview {
-    SalaryCircleView(desiredSalary: 10000, salary: 9000)
+    SalaryCircleView(desiredSalary: .constant(10000), salary: .constant(9000))
 }

@@ -121,7 +121,8 @@ struct SalaryView: View {
                         }
                     Spacer()
                     
-                    Text("\(vm.totalSalary)")
+                    SalaryCircleView(desiredSalary: .constant(10000), salary: $vm.totalSalary)
+                        .padding()
                     
                     Spacer()
                     Image(systemName: "greaterthan.circle")

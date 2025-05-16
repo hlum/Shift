@@ -31,6 +31,7 @@ final class AddShiftViewModel: ObservableObject {
     }
     
     /// Return true if adding shift is success
+    @MainActor
     func addShift() async -> Bool {
         guard let company else {
             // Show Alert
