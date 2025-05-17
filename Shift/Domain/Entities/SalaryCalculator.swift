@@ -29,6 +29,10 @@ final class SalaryCalculator {
     ) async throws -> Double {
         var totalSalary: Double = 0
         
+        guard shiftStartTime < shiftEndTime else {
+            return 0
+        }
+        
         var latePlusRate = 0.0
         if let lateRate = lateSalary?.lateSalary {
             latePlusRate = Double(lateRate - baseSalary)

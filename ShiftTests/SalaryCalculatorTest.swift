@@ -124,8 +124,148 @@ struct SalaryCalculatorTest {
         #expect(salary == 11000, "Salary should include overtime pay")
     }
     
+    
+    @Test("Holiday Salary should be greater than normal pay")
+    func holidaySalaryShouldBeGreaterThanNormalPay() async throws {
+        for _ in 1...100 {
+            // Given
+            let startTime = createRandomDate()
+            let endTime = createRandomDate()
+            let baseSalary = randomSalary(range: 1000...1199)
+            let holidaySalary = randomSalary(range: 1200...1600)
+            
+            // When
+            let isHolidaySalary = try await salaryCalculator.calculateTotalSalary(
+                baseSalary: baseSalary,
+                transportationExpense: 0,
+                paymentType: .hourly,
+                shiftStartTime: startTime,
+                shiftEndTime: endTime,
+                baseWorkHours: nil,
+                overtimeSalary: nil,
+                breakDuration: 0,
+                holidaySalary: holidaySalary,
+                lateSalary: nil,
+                isHoliday: true
+            )
+            
+            let isNotHolidaySalary = try await salaryCalculator.calculateTotalSalary(
+                baseSalary: baseSalary,
+                transportationExpense: 0,
+                paymentType: .hourly,
+                shiftStartTime: startTime,
+                shiftEndTime: endTime,
+                baseWorkHours: nil,
+                overtimeSalary: nil,
+                breakDuration: 0,
+                holidaySalary: holidaySalary,
+                lateSalary: nil,
+                isHoliday: false
+            )
+            
+            // Then
+            #expect(isHolidaySalary >= isNotHolidaySalary)
+            
+        }
+    }
+    
+    @Test("Randomized time calculation")
+    func randomizedTimeCalculation() async throws {
+        for _ in 1...100 {
+            // Given
+            let startTime = createRandomDate()
+            let endTime = createRandomDate()
+            let baseSalary = randomSalary()
+            let holidaySalary = randomSalary(range: 1200...1600)
+            let isHoliday = Bool.random()
+            
+            // When
+            let salary = try await salaryCalculator.calculateTotalSalary(
+                baseSalary: baseSalary,
+                transportationExpense: 0,
+                paymentType: .hourly,
+                shiftStartTime: startTime,
+                shiftEndTime: endTime,
+                baseWorkHours: nil,
+                overtimeSalary: nil,
+                breakDuration: 0,
+                holidaySalary: holidaySalary,
+                lateSalary: nil,
+                isHoliday: isHoliday
+            )
+            
+            // Then
+            print("Random test: \(startTime) ~ \(endTime), base: \(baseSalary), holiday: \(holidaySalary), isHoliday: \(isHoliday), salary: \(salary)")
+            #expect(salary >= 0, "Salary should not be negative")
+        }
+    }
+    
+    @Test("Randomized time calculation")
+    func salaryShouldEqualOrGreaterThanBaseSalary() async throws {
+        for _ in 1...100 {
+            // Given
+            let randomHour = Int.random(in: 8...18)
+            print(randomHour)
+            let (startTime, endTime) = createRandomStartAndEndDate(workHour: randomHour)
+            let baseSalary = randomSalary(range: 1000...1199)
+            let holidaySalary = randomSalary(range: 1200...1600)
+            let isHoliday = Bool.random()
+            
+            // When
+            let salary = try await salaryCalculator.calculateTotalSalary(
+                baseSalary: baseSalary,
+                transportationExpense: 0,
+                paymentType: .hourly,
+                shiftStartTime: startTime,
+                shiftEndTime: endTime,
+                baseWorkHours: nil,
+                overtimeSalary: nil,
+                breakDuration: 0,
+                holidaySalary: holidaySalary,
+                lateSalary: nil,
+                isHoliday: isHoliday
+            )
+            
+
+            // Then
+            var expectedMinSalary = isHoliday ? Double(holidaySalary * randomHour) : Double(baseSalary * randomHour)
+            
+            print("Random test: \(startTime) ~ \(endTime), workHour: \(randomHour), base: \(baseSalary), holiday: \(holidaySalary), isHoliday: \(isHoliday), salary: \(salary)")
+            
+            #expect(salary >= expectedMinSalary, "Salary should be greater than or equal to base salary")
+        }
+    }
+
+    
     // Helper function to create test dates
     private func createDate(year: Int = 2025, month: Int = 5, day: Int = 5, hour: Int = 10, minute: Int = 0) -> Date {
         return Calendar.current.date(from: DateComponents(year: year, month: month, day: day, hour: hour, minute: minute))!
     }
+    
+    private func randomHour(range: ClosedRange<Int> = 0...23) -> Int {
+        return Int.random(in: range)
+    }
+
+    private func randomDay(range: ClosedRange<Int> = 1...28) -> Int {
+        return Int.random(in: range)
+    }
+    
+    private func createRandomStartAndEndDate(workHour: Int) -> (Date, Date) {
+        let day = randomDay()
+        let hour = randomHour()
+        let startDate = createDate(day: day, hour: hour)
+        let endDate = Calendar.current.date(byAdding: .hour, value: workHour, to: startDate)!
+        return (startDate, endDate)
+    }
+
+    private func createRandomDate() -> Date {
+        let day = randomDay()
+        let hour = randomHour()
+        return createDate(day: day, hour: hour)
+    }
+
+    private func randomSalary(range: ClosedRange<Int> = 900...2000) -> Int {
+        return Int.random(in: range)
+    }
+
 }
