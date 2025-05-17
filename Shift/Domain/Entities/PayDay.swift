@@ -41,7 +41,7 @@ extension PayTiming {
     
     /// Returns the (year, month) tuple for the payment based on the pay timing
     func paymentMonth(forWorkMonth workMonth: Int, year: Int) -> (year: Int, month: Int) {
-        var dateComponents = DateComponents(year: year, month: workMonth)
+        let dateComponents = DateComponents(year: year, month: workMonth)
         let calendar = Calendar.current
         let offset: Int
         switch self {
@@ -100,7 +100,7 @@ extension PayDayType {
         calendar: Calendar = .current
     ) -> Date? {
         // Calculate the payment month and year based on timing
-        var dateComponents = DateComponents(year: workYear, month: workMonth)
+        let dateComponents = DateComponents(year: workYear, month: workMonth)
         let offset: Int
         switch payTiming {
         case .currentMonth: offset = 0
