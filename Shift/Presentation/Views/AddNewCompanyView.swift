@@ -44,7 +44,6 @@ final class AddNewCompanyViewModel: ObservableObject {
         !companyName.isEmpty &&
         baseSalary > 0 &&
         transportationExpense >= 0 &&
-        (paymentType == .oneDay || baseWorkHours != nil) &&
         (lateSalary == nil || (lateSalaryStartTime != nil && lateSalaryEndTime != nil))
     }
     
