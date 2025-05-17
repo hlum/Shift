@@ -10,11 +10,10 @@ import Foundation
 class HolidayUseCase {
     private let holidayRepository: HolidayRepository
     
-    private let countryCode: String
+    private let countryCode: String = Locale.current.region?.identifier ?? "US"
     
-    init(holidayRepository: HolidayRepository, countryCode: String) {
+    init(holidayRepository: HolidayRepository) {
         self.holidayRepository = holidayRepository
-        self.countryCode = countryCode
     }
     
     func fetchHolidays() async -> [Holiday] {
@@ -44,7 +43,7 @@ class HolidayUseCase {
 
 class MockHolidayUseCase: HolidayUseCase {
     init() {
-        super.init(holidayRepository: MockHolidayRepo(), countryCode: "JP")
+        super.init(holidayRepository: MockHolidayRepo())
     }
 }
 
