@@ -34,27 +34,46 @@ struct SwiftDataCompanyRepoTests {
            paymentType: .hourly
        )
    )
+    
+    
+    var container: ModelContainer?
+
+    
+    init()async throws {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        container = try ModelContainer(for: Company.self, configurations: config)
+    }
+    
+    
+    @MainActor
     @Test
     func testAddAndFetchCompany() async throws {
-        let repo = try await getRepo()
-        let context = try await testContainer().mainContext
-
+        guard let container = container else {
+            throw TestError.containerNotInitialized
+        }
+        let context = container.mainContext
+        
+        let repo = SwiftDataCompanyRepo(context: context)
         // Add a company
         await repo.addCompany(company)
 
 
         // Fetch companies
         let descriptor = FetchDescriptor<Company>()
-        let results = try await context.fetch(descriptor)
+        let results = try context.fetch(descriptor)
         #expect(results.count == 1)
         #expect(results.first?.name == "Test2Company")
     }
 
+    @MainActor
     @Test
     func testUpdateCompany() async throws {
-        let repo = try await getRepo()
-        let context = try await testContainer().mainContext
-
+        guard let container = container else {
+            throw TestError.containerNotInitialized
+        }
+        let context = container.mainContext
+        
+        let repo = SwiftDataCompanyRepo(context: context)
 
 
         // Add
@@ -70,11 +89,15 @@ struct SwiftDataCompanyRepoTests {
         #expect(results.first?.name == "New Name")
     }
 
+    @MainActor
     @Test
     func testDeleteCompany() async throws {
-        let repo = try await getRepo()
-        let context = try await testContainer().mainContext
-
+        guard let container = container else {
+            throw TestError.containerNotInitialized
+        }
+        let context = container.mainContext
+        
+        let repo = SwiftDataCompanyRepo(context: context)
 
         // Add
         await repo.addCompany(company)
@@ -86,17 +109,5 @@ struct SwiftDataCompanyRepoTests {
         let results = try context.fetch(descriptor)
 
         #expect(results.isEmpty)
-    }
-
-    func testContainer() throws -> ModelContainer {
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        return try ModelContainer(for: Company.self, configurations: config)
-    }
-    
-    func getRepo() async throws -> SwiftDataCompanyRepo {
-        let container = try testContainer()
-        let context = await container.mainContext
-        let repo = await SwiftDataCompanyRepo(context: context)
-        return repo
     }
 }
