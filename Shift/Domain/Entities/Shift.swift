@@ -47,3 +47,38 @@ struct Time {
         return hour * 60 + minute
     }
 }
+
+struct ShiftSegment {
+    let start: Date
+    let end: Date
+    let isHoliday: Bool
+}
+
+class ShiftSplitter {
+    static let shared: ShiftSplitter = ShiftSplitter()
+
+    func splitShiftByDay(
+        shiftStart: Date,
+        shiftEnd: Date,
+        holidays: [Date]
+    ) -> [ShiftSegment] {
+        var segments: [ShiftSegment] = []
+        var currentStart = shiftStart
+        let calendar = Calendar.current
+
+        while currentStart < shiftEnd {
+            let nextDay = calendar.date(byAdding: .day, value: 1, to: currentStart)!
+            let segmentEnd = min(shiftEnd, calendar.startOfDay(for: nextDay))
+            let holiday = isHoliday(date: currentStart, holidays: holidays)
+            segments.append(ShiftSegment(start: currentStart, end: segmentEnd, isHoliday: holiday))
+            currentStart = segmentEnd
+        }
+        return segments
+    }
+    
+    private func isHoliday(date: Date, holidays: [Date]) -> Bool {
+        let calendar = Calendar.current
+        return holidays.contains { calendar.isDate($0, inSameDayAs: date) }
+    }
+    
+}

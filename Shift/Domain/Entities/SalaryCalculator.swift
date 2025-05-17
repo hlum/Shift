@@ -11,25 +11,21 @@ import Foundation
 final class SalaryCalculator {
     private let debugShift: String = "Fa"
     
-    
-    
-    func calculateTotalSalary(
+    func calculateOneSegmentSalary(
         shiftName: String = "Fa",
+        shiftSegment: ShiftSegment,
         baseSalary: Int,
         transportationExpense: Int,
         paymentType: PaymentType,
-        shiftStartTime: Date,
-        shiftEndTime: Date,
         baseWorkHours: Double?,
         overtimeSalary: Int?,
         breakDuration: Double,
         holidaySalary: Int?,
-        lateSalary: LateSalary?,
-        isHoliday: Bool
+        lateSalary: LateSalary?
     ) async throws -> Double {
         var totalSalary: Double = 0
         
-        guard shiftStartTime < shiftEndTime else {
+        guard shiftSegment.start < shiftSegment.end else {
             return 0
         }
         
@@ -57,8 +53,8 @@ final class SalaryCalculator {
 
         }
         
-        let roundedStartTime = roundToNearestMinute(shiftStartTime)
-        let roundedEndTime = roundToNearestMinute(shiftEndTime)
+        let roundedStartTime = roundToNearestMinute(shiftSegment.start)
+        let roundedEndTime = roundToNearestMinute(shiftSegment.end)
         debug(for: shiftName, "startTimeRounded: \(roundedStartTime.formatted(.dateTime.day().hour().minute().second()))\n endTimeRounded: \(roundedEndTime.formatted(.dateTime.day().hour().minute().second()))")
 
         let hoursWorked = getHoursWorked(
@@ -68,9 +64,9 @@ final class SalaryCalculator {
             breakDuration: breakDuration
         )
 
-        debug(for: shiftName, "isHoliday: \(isHoliday)")
+        debug(for: shiftName, "isHoliday: \(shiftSegment.isHoliday)")
         
-        let baseRate = holidaySalary != nil && isHoliday ?
+        let baseRate = holidaySalary != nil && shiftSegment.isHoliday ?
             Double(holidaySalary!) :
             Double(baseSalary)
         

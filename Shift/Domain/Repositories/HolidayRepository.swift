@@ -10,4 +10,5 @@ import Foundation
 protocol HolidayRepository {
     func fetchHolidays(for date: Date, countryCode: String) async throws -> [Holiday]
     func fetchHolidays(countryCode: String) async throws -> [Holiday]
+    func fetchHolidays(between dateInterval: DateInterval, countryCode: String) async throws -> [Holiday]
 }
