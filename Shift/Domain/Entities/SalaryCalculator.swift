@@ -140,9 +140,16 @@ final class SalaryCalculator {
               let lateEnd
         else { return 0.0 }
         
+        debug(for: debugShift, "LateStart: \(lateStart.formatted())")
+        debug(for: debugShift, "LateStart: \(lateEnd.formatted())")
+
+
         let lateStartTime = Time(date: lateStart)
         let lateEndTime = Time(date: lateEnd)
         
+        debug(for: debugShift, "LateStart: \(lateStartTime.hour):\(lateStartTime.minute)")
+        debug(for: debugShift, "LateStart: \(lateEndTime.hour):\(lateEndTime.minute)")
+
         let lateNightHours = calculateLateNightHours(
             shiftName: shiftName,
             shiftStart: shiftStart,
@@ -150,9 +157,9 @@ final class SalaryCalculator {
             lateStart: lateStartTime,
             lateEnd: lateEndTime
         )
+        debug(for: debugShift, "Total LateNight Hours: \(lateNightHours)")
         return latePlusRate * lateNightHours
     }
-    
     
     
     private func calculateLateNightHours(
@@ -164,50 +171,57 @@ final class SalaryCalculator {
     ) -> Double {
         let calendar = Calendar.current
         
-        // Convert late night period to Date
-        func createLatePeriod(for date: Date) -> (start: Date, end: Date) {
-            var startComponents = calendar.dateComponents([.year, .month, .day], from: date)
-            startComponents.hour = lateStart.hour
-            startComponents.minute = lateStart.minute
-            let startDate = calendar.date(from: startComponents)!
-            
-            var endComponents = startComponents
-            endComponents.hour = lateEnd.hour
-            endComponents.minute = lateEnd.minute
-            
-            // If late night period crosses midnight, add one day
-            if lateEnd.hour < lateStart.hour || (lateEnd.hour == lateStart.hour && lateEnd.minute < lateStart.minute) {
-                endComponents.day! += 1
-            }
-            let endDate = calendar.date(from: endComponents)!
-            
-            return (startDate, endDate)
+        // Helper to create Date from Time and reference date
+        func date(from time: Time, reference: Date) -> Date {
+            var components = calendar.dateComponents([.year, .month, .day], from: reference)
+            components.hour = time.hour
+            components.minute = time.minute
+            return calendar.date(from: components)!
         }
         
-        var totalLateHours: Double = 0.0
-        var currentDate = calendar.startOfDay(for: shiftStart)
+        // Create late night period dates
+        let lateStartDate = date(from: lateStart, reference: shiftStart)
+        let lateEndDate = date(from: lateEnd, reference: shiftStart)
         
-        // Loop until we reach the end of the shift
-        while currentDate < shiftEnd {
-            let (lateStartDate, lateEndDate) = createLatePeriod(for: currentDate)
+        // If lateEnd is before or equal to lateStart, it means the period passes midnight
+        let crossesMidnight = lateEnd.hour < lateStart.hour || (lateEnd.hour == lateStart.hour && lateEnd.minute <= lateStart.minute)
+        
+        if crossesMidnight {
+            // For overnight shifts, we need to handle two cases:
+            // 1. Shift starts before midnight and ends after midnight
+            // 2. Shift starts after midnight
             
-            // Calculate overlap between shift and late night period
-            let overlapStart = max(shiftStart, lateStartDate)
-            let overlapEnd = min(shiftEnd, lateEndDate)
-            
-            if overlapEnd > overlapStart {
-                let seconds = overlapEnd.timeIntervalSince(overlapStart)
-                totalLateHours += seconds / 3600.0
+            // If shift starts after midnight, we only need to check overlap with the early morning part
+            if calendar.component(.hour, from: shiftStart) >= 0 && calendar.component(.hour, from: shiftStart) < lateEnd.hour {
+                let overlap = overlapDuration(start1: shiftStart, end1: shiftEnd, start2: date(from: Time(hour: 0, minute: 0), reference: shiftStart), end2: lateEndDate)
+                return overlap / 3600.0
             }
             
-            // Move to next day
-            guard let nextDay = calendar.date(byAdding: .day, value: 1, to: currentDate) else { break }
-            currentDate = nextDay
+            // If shift starts before midnight, we need to check both parts
+            let nextDayOfShiftStart = calendar.date(byAdding: .day,value: 1, to: shiftStart)!
+            let lateEndOfDay = calendar.date(bySettingHour: 00, minute: 00, second: 00, of: nextDayOfShiftStart)!
+            let midnight = calendar.date(bySettingHour: 0, minute: 0, second: 0, of: calendar.date(byAdding: .day, value: 1, to: shiftStart)!)!
+            let lateStartNextDay = date(from: lateEnd, reference: calendar.date(byAdding: .day, value: 1, to: shiftStart)!)
+            
+            // Overlap 1: lateStartDate to lateEndOfDay
+            let overlap1 = overlapDuration(start1: shiftStart, end1: shiftEnd, start2: lateStartDate, end2: lateEndOfDay)
+            // Overlap 2: midnight to lateStartNextDay
+            let overlap2 = overlapDuration(start1: shiftStart, end1: shiftEnd, start2: midnight, end2: lateStartNextDay)
+            
+            return (overlap1 + overlap2) / 3600.0
+        } else {
+            // Late period does not cross midnight
+            let overlap = overlapDuration(start1: shiftStart, end1: shiftEnd, start2: lateStartDate, end2: lateEndDate)
+            return overlap / 3600.0
         }
-        debug(for: shiftName, "Total LateHours: \(totalLateHours)h")
-        return totalLateHours
     }
     
+    // Helper to calculate overlap duration in seconds between two intervals
+    private func overlapDuration(start1: Date, end1: Date, start2: Date, end2: Date) -> TimeInterval {
+        let start = max(start1, start2)
+        let end = min(end1, end2)
+        return max(0, end.timeIntervalSince(start))
+    }
     
     
     /// Calculates the total hours worked between two times, subtracting break time.
