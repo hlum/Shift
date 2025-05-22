@@ -56,42 +56,37 @@ final class AddNewCompanyViewModel: ObservableObject {
         isLoading = true
         error = nil
         
-        do {
-            let salary = Salary(
-                baseSalary: baseSalary,
-                transportationExpense: transportationExpense,
-                holidaySalary: holidaySalary,
-                overtimeSalary: baseWorkHours == nil && overtimeSalary == nil ? nil : OverTimeSetting(
-                    baseWorkHours: baseWorkHours!,
-                    overtimePayRate: overtimeSalary!
-                ),
-                lateSalary: LateSalary(
-                    lateSalary: lateSalary,
-                    startTime: lateSalaryStartTime,
-                    endTime: lateSalaryEndTime
-                ),
-                paymentType: paymentType
-            )
-            
-            let newCompany = Company(
-                name: companyName,
-                color: selectedColor,
-                endDate: settlementDate,
-                payDay: PayDay(
-                    payDay: payDay,
-                    payTiming: payTiming,
-                    holidayPayDayChange: holidayPayDayChange,
-                    holidayPayEarly: holidayPayEarly
-                ),
-                salary: salary
-            )
-            
-            await companyUseCase.addCompany(newCompany)
-            isLoading = false
-        } catch {
-            self.error = error
-            isLoading = false
-        }
+        let salary = Salary(
+            baseSalary: baseSalary,
+            transportationExpense: transportationExpense,
+            holidaySalary: holidaySalary,
+            overtimeSalary: baseWorkHours == nil && overtimeSalary == nil ? nil : OverTimeSetting(
+                baseWorkHours: baseWorkHours!,
+                overtimePayRate: overtimeSalary!
+            ),
+            lateSalary: LateSalary(
+                lateSalary: lateSalary,
+                startTime: lateSalaryStartTime,
+                endTime: lateSalaryEndTime
+            ),
+            paymentType: paymentType
+        )
+        
+        let newCompany = Company(
+            name: companyName,
+            color: selectedColor,
+            endDate: settlementDate,
+            payDay: PayDay(
+                payDay: payDay,
+                payTiming: payTiming,
+                holidayPayDayChange: holidayPayDayChange,
+                holidayPayEarly: holidayPayEarly
+            ),
+            salary: salary
+        )
+        
+        await companyUseCase.addCompany(newCompany)
+        isLoading = false
     }
     
     func updateUseCase(_ newUseCase: CompanyUseCase) {
@@ -105,7 +100,7 @@ enum ValidationError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidInput:
-            return "Please check your input values. All required fields must be filled correctly."
+            return NSLocalizedString("Please check your input values. All required fields must be filled correctly.", comment: "")
         }
     }
 }
@@ -126,8 +121,8 @@ struct AddNewCompanyView: View {
         ZStack {
             Form {
                 Section {
-                    LabeledContent("Company Name") {
-                        TextField("required", text: $vm.companyName)
+                    LabeledContent(NSLocalizedString("Company Name", comment: "")) {
+                        TextField(NSLocalizedString("required", comment: ""), text: $vm.companyName)
                     }
                     colorSelection
                 }
@@ -137,7 +132,7 @@ struct AddNewCompanyView: View {
                     payDaySelection
                 }
                 
-                Section("Salary Information") {
+                Section(NSLocalizedString("Salary Information", comment: "")) {
                     NavigationLink {
                         SalarySettingView(
                             showPaymentTypePicker: $vm.showPaymentTypePicker,
@@ -153,7 +148,8 @@ struct AddNewCompanyView: View {
                         )
                     } label: {
                         HStack {
-                            Text("Base salary").foregroundStyle(.gray)
+                            Text(NSLocalizedString("Base salary", comment: ""))
+                                .foregroundStyle(.gray)
                             Text("\(vm.baseSalary)")
                         }
                     }
@@ -177,7 +173,7 @@ struct AddNewCompanyView: View {
                         dismiss.callAsFunction()
                     }
                 } label: {
-                    Text("Add New Company")
+                    Text(NSLocalizedString("Add New Company", comment: ""))
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                         .frame(height: 55)
@@ -211,7 +207,7 @@ extension AddNewCompanyView {
             vm.showSettlementDatePicker = true
         } label: {
             HStack {
-                Text("Settlement Day")
+                Text(NSLocalizedString("Settlement Day", comment: ""))
                     .foregroundStyle(.gray)
                 Text("\(vm.settlementDate.displayString)")
             }
@@ -229,7 +225,8 @@ extension AddNewCompanyView {
             )
         } label: {
             HStack {
-                Text("Paid at").foregroundStyle(.gray)
+                Text(NSLocalizedString("Paid at", comment: ""))
+                    .foregroundStyle(.gray)
                 Text(vm.payTiming.displayString)
                 Text(vm.payDay.displayString)
             }
@@ -247,7 +244,7 @@ extension AddNewCompanyView {
                             .foregroundStyle(colorName.color)
                             .frame(height: 10)
 
-                        Text(colorName.rawValue)
+                        Text(colorName.disPlayName)
                         
                         Spacer()
                         
@@ -262,12 +259,12 @@ extension AddNewCompanyView {
 
         } label: {
                 HStack {
-                    Text("Color")
+                    Text(NSLocalizedString("Color", comment: ""))
                     Spacer()
                     Circle()
                         .foregroundStyle(vm.selectedColor.color)
                         .frame(height: 10)
-                    Text(vm.selectedColor.rawValue)
+                    Text(vm.selectedColor.disPlayName)
                     
                 }
         }
@@ -296,7 +293,7 @@ struct SalarySettingView: View {
                 Form {
                     Section {
                         HStack {
-                            Text("Salary")
+                            Text(NSLocalizedString("Salary", comment: ""))
                                 .foregroundStyle(.gray)
                             
                             Spacer()
@@ -304,14 +301,14 @@ struct SalarySettingView: View {
                             Button {
                                 showPaymentTypePicker.toggle()
                             } label: {
-                                Text(paymentType.rawValue)
+                                Text(NSLocalizedString(paymentType.rawValue, comment: ""))
                                     .foregroundStyle(.black)
                             }
                             
                             Rectangle()
                                 .frame(width: 1, height: 20)
                             
-                            TextField("Base Salary", text: Binding(
+                            TextField(NSLocalizedString("Base Salary",comment: ""), text: Binding(
                                 get: { String("\(baseSalary)") },
                                 set: { newValue in
                                     if let intValue = Int(newValue) {
@@ -330,7 +327,7 @@ struct SalarySettingView: View {
                     
                     Section {
                         HStack {
-                            Text("Transport Expense")
+                            Text(NSLocalizedString("Transport Expense", comment: ""))
                                 .foregroundStyle(.gray)
                             Spacer()
                             
@@ -348,14 +345,14 @@ struct SalarySettingView: View {
                         }
                         
                         HStack {
-                            Text("Holiday Salary")
+                            Text(NSLocalizedString("Holiday Salary", comment: ""))
                                 .foregroundStyle(.gray)
                             Spacer()
                             
-                            TextField("Holiday Salary", text: Binding(
+                            TextField(NSLocalizedString("Holiday Salary", comment: ""), text: Binding(
                                 get: {
                                     holidaySalary != nil ? String(holidaySalary!)
-                                    : "None"
+                                    : NSLocalizedString("None", comment: "")
                                 },
                                 set: { newValue in
                                     if let intValue = Int(newValue) {
@@ -379,26 +376,25 @@ struct SalarySettingView: View {
                                 )
                             } label: {
                                 HStack {
-                                    Text("Late Night Salary")
+                                    Text(NSLocalizedString("Late Night Salary", comment: ""))
                                         .foregroundStyle(.gray)
                                     
-                                    Text("\(lateSalary != nil ? String("\(lateSalary!)") : "none")")
+                                    Text("\(lateSalary != nil ? String("\(lateSalary!)") : NSLocalizedString("None", comment: ""))")
                                 }
                             }
                             
                             
                             NavigationLink {
-                                Text("")
                                 OverTimeSalaryView(
                                     baseWorkHours: $baseWorkHours,
                                     overTimePayRate: $overtimeSalary
                                 )
                             } label: {
                                 HStack {
-                                    Text("Overtime Salary")
+                                    Text(NSLocalizedString("Overtime Salary", comment: ""))
                                         .foregroundStyle(.gray)
                                     
-                                    Text("\(overtimeSalary != nil ? String("\(overtimeSalary!)") : "none")")
+                                    Text("\(overtimeSalary != nil ? String("\(overtimeSalary!)") : NSLocalizedString("None", comment: ""))")
                                     
                                 }
                             }
@@ -425,7 +421,7 @@ struct LateNightPayView: View {
 
     var body: some View {
         Form {
-            Toggle("Late Night Salary", isOn: Binding(
+            Toggle(NSLocalizedString("Late Night Salary", comment: ""), isOn: Binding(
                 get:{ hasLateNightSalary } ,
                 set: { newValue in
                     
@@ -442,11 +438,11 @@ struct LateNightPayView: View {
             if hasLateNightSalary {
                 Section {
                     HStack {
-                        Text("Late Night Rate")
+                        Text(NSLocalizedString("Late Night Rate", comment: ""))
                             .foregroundStyle(.gray)
                         Spacer()
                         TextField("Late Night Rate", text:Binding(
-                            get: { lateSalary != nil ? "\(lateSalary!)" : "none" },
+                            get: { lateSalary != nil ? "\(lateSalary!)" : NSLocalizedString("None", comment: "") },
                             set: { newValue in
                                 if let intValue = Int(newValue) {
                                     lateSalary = intValue
@@ -459,14 +455,14 @@ struct LateNightPayView: View {
                         .keyboardType(.decimalPad)
                     }
                     
-                    DatePicker("Start Time", selection: Binding(
+                    DatePicker(NSLocalizedString("Start Time", comment: ""), selection: Binding(
                         get: { lateSalaryStartTime ?? Date() },
                         set: { newValue in
                             lateSalaryStartTime = newValue
                         }
                     ), displayedComponents: .hourAndMinute)
                     
-                    DatePicker("End Time", selection: Binding(
+                    DatePicker(NSLocalizedString("End Time", comment: ""), selection: Binding(
                         get: { lateSalaryEndTime ?? Date() },
                         set: { newValue in lateSalaryEndTime = newValue }
                     ), displayedComponents: .hourAndMinute)
@@ -486,7 +482,7 @@ struct OverTimeSalaryView: View {
     var body: some View {
         ZStack {
             Form {
-                Toggle("Has overtime salary", isOn: Binding(
+                Toggle(NSLocalizedString("Has overtime salary",comment:""), isOn: Binding(
                     get:{ hasOverTimeSalary } ,
                     set: { newValue in
                         
@@ -504,18 +500,19 @@ struct OverTimeSalaryView: View {
                             showBaseWorkHourPicker.toggle()
                         } label: {
                             HStack {
-                                Text("Applied when")
+                                Text(NSLocalizedString("Applied when", comment: ""))
                                     .foregroundStyle(.gray)
-                                Text("\(String(format: "%.2f", baseWorkHours ?? 0))h and above")
+                                let hours = baseWorkHours ?? 0
+                                Text(String(format: NSLocalizedString("work_hours_and_above", comment: ""), hours))
                                     .foregroundStyle(.black)
                             }
                         }
                         
                         
                         HStack {
-                            Text("Over Time Rate")
-                            TextField("Over Time Rate", text: Binding(
-                                get: { overTimePayRate != nil ? String(overTimePayRate!) : "None" },
+                            Text(NSLocalizedString("Over Time Rate", comment: ""))
+                            TextField(NSLocalizedString("Over Time Rate", comment: ""), text: Binding(
+                                get: { overTimePayRate != nil ? String(overTimePayRate!) : NSLocalizedString("None", comment: "") },
                                 set: { newValue in
                                     if let intValue = Int(newValue) {
                                         overTimePayRate = intValue
@@ -550,14 +547,14 @@ struct BaseWorkHourPickerView: View {
             }) {
                 HStack {
                     Spacer()
-                    Text("Close")
+                    Text(NSLocalizedString("Close", comment:""))
                         .padding(.horizontal, 16)
                 }
             }
             
             Picker(selection: $selection, label: Text("")) {
                 ForEach(1...24, id: \.self) {
-                    Text("\($0)h")
+                    Text("\($0)" + NSLocalizedString("h", comment: ""))
                         .tag(Double($0))
                 }
             }
@@ -585,7 +582,7 @@ struct PayDateSubView: View {
                     showPayDayPicker = true
                 } label: {
                     HStack {
-                        Text("Paid at")
+                        Text(NSLocalizedString("Paid at", comment: ""))
                             .foregroundStyle(.gray)
                         Text(payTiming.displayString)
                         Text(payDay.displayString)
@@ -594,7 +591,7 @@ struct PayDateSubView: View {
                 
                 
                 Toggle(isOn: $holidayPayDayChange) {
-                    Text("If pay day is holiday, it would change")
+                    Text(NSLocalizedString("If pay day is holiday, it would change", comment: ""))
                 }
                 
                 if holidayPayDayChange {
@@ -603,7 +600,7 @@ struct PayDateSubView: View {
                             holidayPayEarly = true
                         } label: {
                             HStack {
-                                Text("Early Pay")
+                                Text(NSLocalizedString("Early Pay", comment: ""))
                                 Spacer()
                                 if holidayPayEarly {
                                     Image(systemName: "checkmark")
@@ -615,7 +612,7 @@ struct PayDateSubView: View {
                             holidayPayEarly = false
                         } label: {
                             HStack {
-                                Text("Late Pay")
+                                Text(NSLocalizedString("Late Pay", comment: ""))
                                 Spacer()
                                 if !holidayPayEarly {
                                     Image(systemName: "checkmark")
@@ -646,14 +643,14 @@ struct PaymentTypePickerView: View {
             }) {
                 HStack {
                     Spacer()
-                    Text("Close")
+                    Text(NSLocalizedString("Close",comment:""))
                         .padding(.horizontal, 16)
                 }
             }
             
             Picker(selection: $selection, label: Text("")) {
                 ForEach((PaymentType.allCases), id: \.self) {
-                    Text("\($0)")
+                    Text(NSLocalizedString("\($0)", comment: ""))
                         .tag($0)
                 }
             }
@@ -702,7 +699,7 @@ struct PayDatePickerView: View {
                         Text("\(day)")
                             .tag(PayDayType.day(day))
                     }
-                    Text("End of Month")
+                    Text(NSLocalizedString("End of Month", comment: ""))
                         .tag(PayDayType.endOfMonth)
                 }
                 .pickerStyle(.wheel)

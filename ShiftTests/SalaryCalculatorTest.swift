@@ -226,7 +226,7 @@ struct SalaryCalculatorTest {
             
 
             // Then
-            var expectedMinSalary = Double(baseSalary * randomHour)
+            let expectedMinSalary = Double(baseSalary * randomHour)
             
             print("Random test: \(startTime) ~ \(endTime), workHour: \(randomHour), base: \(baseSalary), holiday: \(holidaySalary), isHoliday: \(isHoliday), salary: \(total), expectedMinSalary: \(expectedMinSalary)")
             

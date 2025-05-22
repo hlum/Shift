@@ -55,8 +55,6 @@ final class SwiftDataHolidayRepository: HolidayRepository {
     
     @MainActor
     func fetchHolidays(between dateInterval: DateInterval, countryCode: String) async throws -> [Holiday] {
-        let startOfDate = calendar.startOfDay(for: dateInterval.start)
-        let startOfEndDate = calendar.startOfDay(for: dateInterval.end)
         
         let startDateComponents = calendar.dateComponents([.year, .month, .day], from: dateInterval.start)
         let endDateComponents = calendar.dateComponents([.year, .month, .day], from: dateInterval.end)
