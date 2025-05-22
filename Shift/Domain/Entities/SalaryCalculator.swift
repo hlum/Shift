@@ -7,10 +7,26 @@
 
 import Foundation
 
-@MainActor
-final class SalaryCalculator {
+protocol SalaryCalculator {
+    @MainActor
+    func calculateOneSegmentSalary(
+        shiftName: String,
+        shiftSegment: ShiftSegment,
+        baseSalary: Int,
+        transportationExpense: Int,
+        paymentType: PaymentType,
+        baseWorkHours: Double?,
+        overtimeSalary: Int?,
+        breakDuration: Double,
+        holidaySalary: Int?,
+        lateSalary: LateSalary?
+    ) async throws -> Double
+}
+
+final class SalaryCalculatorImpl: SalaryCalculator {
     private let debugShift: String = "Fa"
     
+    @MainActor
     func calculateOneSegmentSalary(
         shiftName: String = "Fa",
         shiftSegment: ShiftSegment,

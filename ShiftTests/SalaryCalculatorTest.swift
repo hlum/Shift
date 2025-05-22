@@ -14,7 +14,7 @@ struct SalaryCalculatorTest {
     var salaryCalculator: SalaryCalculator
     
     init() async {
-        salaryCalculator = await SalaryCalculator()
+        salaryCalculator = SalaryCalculatorImpl()
     }
     
     @Test("Normal time calculation")
@@ -28,6 +28,7 @@ struct SalaryCalculatorTest {
         var total = 0.0
         for segment in shiftSegment {
             let salary = try await salaryCalculator.calculateOneSegmentSalary(
+                shiftName: "",
                 shiftSegment: segment,
                 baseSalary: 1000,
                 transportationExpense: 0,
@@ -55,6 +56,7 @@ struct SalaryCalculatorTest {
         var total = 0.0
         for segment in shiftSegment {
             let salary = try await salaryCalculator.calculateOneSegmentSalary(
+                shiftName: "",
                 shiftSegment: segment,
                 baseSalary: 1000,
                 transportationExpense: 0,
@@ -95,6 +97,7 @@ struct SalaryCalculatorTest {
         var total = 0.0
         for segment in shiftSegment {
             let salary = try await salaryCalculator.calculateOneSegmentSalary(
+                shiftName: "",
                 shiftSegment: segment,
                 baseSalary: 1000,
                 transportationExpense: 0,
@@ -123,6 +126,7 @@ struct SalaryCalculatorTest {
         var total = 0.0
         for segment in shiftSegment {
             let salary = try await salaryCalculator.calculateOneSegmentSalary(
+                shiftName: "",
                 shiftSegment: segment,
                 baseSalary: 1000,
                 transportationExpense: 0,
@@ -164,6 +168,7 @@ struct SalaryCalculatorTest {
             var total = 0.0
             for segment in shiftSegments {
                 let salary = try await salaryCalculator.calculateOneSegmentSalary(
+                    shiftName: "",
                     shiftSegment: segment,
                     baseSalary: baseSalary,
                     transportationExpense: 0,
@@ -205,6 +210,7 @@ struct SalaryCalculatorTest {
             var total = 0.0
             for segment in shiftSegments {
                 let salary = try await salaryCalculator.calculateOneSegmentSalary(
+                    shiftName: "",
                     shiftSegment: segment,
                     baseSalary: baseSalary,
                     transportationExpense: 0,

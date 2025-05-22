@@ -21,7 +21,7 @@ struct MainTabView: View {
                     }
                     .tag(0)
                 
-                SalaryView(shiftUseCase: container.shiftUseCase, holidayUseCase: container.holidayUseCase)
+                SalaryView(shiftUseCase: container.shiftUseCase, salaryUseCase: container.salaryUseCase)
                     .tabItem {
                         Image(systemName: "dollarsign")
                     }

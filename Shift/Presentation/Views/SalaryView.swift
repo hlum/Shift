@@ -10,7 +10,7 @@ import SwiftData
 
 final class SalaryViewModel: ObservableObject {
     private let shiftUseCase: ShiftUseCase
-    private let holidayUseCase: HolidayUseCase
+    private let salaryUseCase: SalaryUseCaseProtocol
     
     @Published var selectedDate: Date = Date()
     @Published var shifts: [Shift] = []
@@ -21,9 +21,13 @@ final class SalaryViewModel: ObservableObject {
     @Published var error: Error?
     let countryCode: String
     
-    init(shiftUseCase: ShiftUseCase, holidayUseCase: HolidayUseCase, countryCode: String?) {
+    init(
+        shiftUseCase: ShiftUseCase,
+        salaryUseCase: SalaryUseCaseProtocol,
+        countryCode: String?
+    ) {
         self.shiftUseCase = shiftUseCase
-        self.holidayUseCase = holidayUseCase
+        self.salaryUseCase = salaryUseCase
         self.countryCode = countryCode ?? "US"
     }
     
@@ -54,48 +58,8 @@ final class SalaryViewModel: ObservableObject {
     
     @MainActor
     private func calculateTotalSalary(for shifts: [Shift]) async {
-        let salaryCalculator = SalaryCalculator()
-        guard !shifts.isEmpty else {
-            totalSalary = 0
-            return
-        }
-        
         do {
-            let salaries = try await withThrowingTaskGroup(of: Double.self) { group in
-                for shift in shifts {
-                    let company = shift.company
-                    let salary = company.salary
-                    
-                    // Check if the shift date is a holiday
-                    let holidays = await holidayUseCase.fetchHolidaysAndWeekends(between: DateInterval(start: shift.startTime, end: shift.endTime), countryCode: countryCode)
-                    
-                    let segments = ShiftSplitter.shared.splitShiftByDay(shiftStart: shift.startTime, shiftEnd: shift.endTime, holidays: holidays)
-                    for segment in segments {
-                        group.addTask { @MainActor in
-                            try await salaryCalculator.calculateOneSegmentSalary(
-                                shiftName: shift.name,
-                                shiftSegment: segment,
-                                baseSalary: salary.baseSalary,
-                                transportationExpense: salary.transportationExpense,
-                                paymentType: salary.paymentType,
-                                baseWorkHours: salary.overtimeSalary?.baseWorkHours,
-                                overtimeSalary: salary.overtimeSalary?.overtimePayRate,
-                                breakDuration: shift.breakDuration,
-                                holidaySalary: salary.holidaySalary,
-                                lateSalary: salary.lateSalary
-                            )
-                        }
-                    }
-                }
-                
-                var total: Double = 0
-                for try await salary in group {
-                    total += salary
-                }
-                return total
-            }
-            
-            totalSalary = salaries
+            totalSalary = try await salaryUseCase.calculateMonthlySalary(for: shifts, countryCode: countryCode)
         } catch {
             self.error = error
         }
@@ -118,8 +82,16 @@ struct SalaryView: View {
     @StateObject var vm: SalaryViewModel
     @Environment(\.locale) private var locale
     
-    init(shiftUseCase: ShiftUseCase = MockShiftUseCase(), holidayUseCase: HolidayUseCase = MockHolidayUseCase(), locale: Locale? = .current) {
-        _vm = StateObject(wrappedValue: SalaryViewModel(shiftUseCase: shiftUseCase, holidayUseCase: holidayUseCase, countryCode: locale?.region?.identifier))
+    init(
+        shiftUseCase: ShiftUseCase = MockShiftUseCase(),
+        salaryUseCase: SalaryUseCaseProtocol = MockSalaryUseCase(),
+        locale: Locale? = .current
+    ) {
+        _vm = StateObject(wrappedValue: SalaryViewModel(
+            shiftUseCase: shiftUseCase,
+            salaryUseCase: salaryUseCase,
+            countryCode: locale?.region?.identifier
+        ))
     }
     
     var body: some View {
