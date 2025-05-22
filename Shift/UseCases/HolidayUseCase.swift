@@ -34,9 +34,50 @@ class HolidayUseCase {
         }
     }
     
+    func fetchHolidays(between dateInterval: DateInterval, countryCode: String) async -> [Holiday] {
+        do {
+            return try await holidayRepository.fetchHolidays(between: dateInterval, countryCode: countryCode)
+        } catch {
+            print("Error fetching holidays: \(error.localizedDescription)")
+            return []
+        }
+    }
+    
+    func fetchHolidaysAndWeekends(between dateInterval: DateInterval, countryCode: String) async -> [Date] {
+        do {
+            let holidays = try await holidayRepository.fetchHolidays(between: dateInterval, countryCode: countryCode).map{$0.date}
+            let weekends = fetchWeekend(between: dateInterval)
+            return Array(Set(holidays + weekends))
+        } catch {
+            print("Error fetching holidays: \(error.localizedDescription)")
+            return []
+        }
+    }
+    
     func isWeekend(_ date: Date) -> Bool {
         return Calendar.current.isDateInWeekend(date)
     }
+    
+    
+    func fetchWeekend(between dateInterval: DateInterval) -> [Date] {
+        var weekends: [Date] = []
+        let calendar = Calendar.current
+        var currentDate = calendar.startOfDay(for: dateInterval.start)
+        let endDate = calendar.startOfDay(for: dateInterval.end)
+        
+        while currentDate <= endDate {
+            
+            if isWeekend(currentDate) {
+                weekends.append(currentDate)
+            }
+            guard let nextDate = calendar.date(byAdding: .day, value: 1, to: currentDate) else {
+                break
+            }
+            currentDate = nextDate
+        }
+        return weekends
+    }
+
     
     
 }

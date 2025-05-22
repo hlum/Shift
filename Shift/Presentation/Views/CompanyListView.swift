@@ -49,10 +49,11 @@ struct CompanyListView: View {
             List(vm.companies) { company in
                 NavigationLink {
                     Text(company.name)
-                    Text(company.color.rawValue)
-                    Text(company.payDay.payDay.displayString)
-                    Text(company.salary.baseSalary.description)
-                    Text(company.salary.overtimeSalary?.overtimePayRate.description ?? "")
+                    Text("Base Salary:" + company.salary.baseSalary.description)
+                    Text("Overtime pay rate:" + "\(company.salary.overtimeSalary?.overtimePayRate ?? 0)")
+                    Text("Late night pay rate:" + "\(company.salary.lateSalary?.lateSalary ?? 0)")
+                    Text("Late night start:" + "\(company.salary.lateSalary?.startTime?.formatted())")
+                    Text("Late night end:" + "\(company.salary.lateSalary?.endTime?.formatted())")
                 } label: {
                     Text(company.name)
                 }

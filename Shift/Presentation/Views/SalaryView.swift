@@ -67,24 +67,24 @@ final class SalaryViewModel: ObservableObject {
                     let salary = company.salary
                     
                     // Check if the shift date is a holiday
-                    let holidays = await holidayUseCase.fetchHoliday(for: shift.startTime)
-                    let isHoliday = !holidays.isEmpty || holidayUseCase.isWeekend(shift.startTime)
+                    let holidays = await holidayUseCase.fetchHolidaysAndWeekends(between: DateInterval(start: shift.startTime, end: shift.endTime), countryCode: countryCode)
                     
-                    group.addTask { @MainActor in
-                        try await salaryCalculator.calculateTotalSalary(
-                            shiftName: shift.name,
-                            baseSalary: salary.baseSalary,
-                            transportationExpense: salary.transportationExpense,
-                            paymentType: salary.paymentType,
-                            shiftStartTime: shift.startTime,
-                            shiftEndTime: shift.endTime,
-                            baseWorkHours: salary.overtimeSalary?.baseWorkHours,
-                            overtimeSalary: salary.overtimeSalary?.overtimePayRate,
-                            breakDuration: shift.breakDuration,
-                            holidaySalary: salary.holidaySalary,
-                            lateSalary: salary.lateSalary,
-                            isHoliday: isHoliday
-                        )
+                    let segments = ShiftSplitter.shared.splitShiftByDay(shiftStart: shift.startTime, shiftEnd: shift.endTime, holidays: holidays)
+                    for segment in segments {
+                        group.addTask { @MainActor in
+                            try await salaryCalculator.calculateOneSegmentSalary(
+                                shiftName: shift.name,
+                                shiftSegment: segment,
+                                baseSalary: salary.baseSalary,
+                                transportationExpense: salary.transportationExpense,
+                                paymentType: salary.paymentType,
+                                baseWorkHours: salary.overtimeSalary?.baseWorkHours,
+                                overtimeSalary: salary.overtimeSalary?.overtimePayRate,
+                                breakDuration: shift.breakDuration,
+                                holidaySalary: salary.holidaySalary,
+                                lateSalary: salary.lateSalary
+                            )
+                        }
                     }
                 }
                 

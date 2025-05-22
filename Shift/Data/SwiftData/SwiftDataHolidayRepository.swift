@@ -53,6 +53,50 @@ final class SwiftDataHolidayRepository: HolidayRepository {
         return try context.fetch(descriptor)
     }
     
+    @MainActor
+    func fetchHolidays(between dateInterval: DateInterval, countryCode: String) async throws -> [Holiday] {
+        let startOfDate = calendar.startOfDay(for: dateInterval.start)
+        let startOfEndDate = calendar.startOfDay(for: dateInterval.end)
+        
+        let startDateComponents = calendar.dateComponents([.year, .month, .day], from: dateInterval.start)
+        let endDateComponents = calendar.dateComponents([.year, .month, .day], from: dateInterval.end)
+        
+        
+        guard let startOfDay = calendar.date(
+            from: DateComponents(
+                year: startDateComponents.year ,
+                month: startDateComponents.month,
+                day: startDateComponents.day,
+                hour: 0,
+                minute: 0,
+                second: 0
+            )
+        ),
+              let startOfTomorrow = calendar.date(
+                from: DateComponents(
+                    year: endDateComponents.year ,
+                    month: endDateComponents.month,
+                    day: endDateComponents.day! + 1,
+                    hour: 0,
+                    minute: 0,
+                    second: 0
+                )
+              ) else {
+            Logger.standard.fault("Can't create startOfDay or startOfTomorrow")
+            return []
+        }
+        
+        let predicate = #Predicate<Holiday> { holiday in
+            holiday.date >= startOfDay && holiday.date < startOfTomorrow &&
+            holiday.countryCode == countryCode
+        }
+        
+        let descriptor = FetchDescriptor<Holiday>(predicate: predicate)
+        let holidays = try context.fetch(descriptor)
+        return holidays
+        
+    }
+    
  
 }
 
