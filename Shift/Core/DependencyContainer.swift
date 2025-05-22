@@ -58,7 +58,7 @@ final class DependencyContainer: ContainerProtocol {
 }
 
 // MARK: - Environment Key
-private struct ContainerKey: EnvironmentKey {
+private struct ContainerKey: @preconcurrency EnvironmentKey {
     @MainActor
     static let defaultValue: ContainerProtocol = DependencyContainer(
         modelContainer: try! ModelContainer(for: Schema([Company.self, Shift.self, Holiday.self]))

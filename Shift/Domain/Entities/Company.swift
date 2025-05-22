@@ -41,7 +41,7 @@ enum SettlementDate: Codable, Equatable, Hashable {
     var displayString: String {
         switch self {
         case .day(let num): return "\(num)"
-        case .endOfMonth: return "End of Month"
+        case .endOfMonth: return NSLocalizedString("End of Month", comment: "")
         }
     }
     
@@ -80,6 +80,16 @@ enum ColorName: String, Codable, CaseIterable {
         case .blue: return .blue
         case .orange: return .orange
         case .customPink: return Color.pink.opacity(0.7)
+        }
+    }
+    
+    var disPlayName: String {
+        switch self {
+        case .red: return NSLocalizedString("Red", comment: "")
+        case .green: return NSLocalizedString("Green", comment: "")
+        case .blue: return NSLocalizedString("Blue", comment: "")
+        case .orange: return NSLocalizedString("Orange", comment: "")
+        case .customPink: return NSLocalizedString("Custom Pink", comment: "")
         }
     }
 }

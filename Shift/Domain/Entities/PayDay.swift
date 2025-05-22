@@ -32,9 +32,9 @@ enum PayTiming: Codable, Equatable, CaseIterable {
 extension PayTiming {
     var displayString: String {
         switch self {
-        case .currentMonth: return "Current Month"
-        case .nextMonth: return "Next Month"
-        case .nextNextMonth: return "Next-Next Month"
+        case .currentMonth: return NSLocalizedString("Current Month", comment: "")
+        case .nextMonth: return NSLocalizedString("Next Month",comment: "")
+        case .nextNextMonth: return NSLocalizedString("Next-Next Month", comment: "")
         }
     }
     
@@ -69,7 +69,7 @@ extension PayDayType {
     var displayString: String {
         switch self {
         case .day(let d): return "\(d)"
-        case .endOfMonth: return "End of Month"
+        case .endOfMonth: return NSLocalizedString("End of Month", comment: "")
         }
     }
     

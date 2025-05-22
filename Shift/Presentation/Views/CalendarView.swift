@@ -60,7 +60,8 @@ struct CalendarView: View {
                     Button {
                         vm.showAddShiftView.toggle()
                     } label: {
-                        Text("+ Add shift")
+                        let addShiftString = NSLocalizedString("Add Shift", comment: "")
+                        Text("+ " + addShiftString)
                             .font(.headline)
                             .foregroundStyle(.blue)
                     }

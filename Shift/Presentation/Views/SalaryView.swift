@@ -111,7 +111,7 @@ struct SalaryView: View {
                     }
                 } label: {
                     VStack {
-                        Text("Desired salary")
+                        Text(NSLocalizedString("Desired salary", comment: ""))
                             .font(.headline.bold())
                             .foregroundStyle(.black)
                         Text("\(vm.desiredSalary)$")
@@ -175,7 +175,7 @@ struct SalaryView: View {
         VStack(spacing: 20) {
             // Header
             HStack {
-                Text("Set Desired Salary")
+                Text(NSLocalizedString("Set Desired Salary", comment: ""))
                     .font(.title2.bold())
                 Spacer()
                 Button {
@@ -193,7 +193,7 @@ struct SalaryView: View {
             
             // Input Section
             VStack(alignment: .leading, spacing: 8) {
-                Text("Annual Salary")
+                Text(NSLocalizedString("Annual Salary", comment: ""))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 
@@ -202,7 +202,7 @@ struct SalaryView: View {
                         .font(.title2.bold())
                         .foregroundStyle(.secondary)
                     
-                    TextField("Enter amount", text: Binding(
+                    TextField(NSLocalizedString("Enter amount", comment: ""), text: Binding(
                         get: { String(vm.desiredSalary) },
                         set: { newValue in
                             // Only allow numbers
@@ -231,7 +231,7 @@ struct SalaryView: View {
                         vm.showDesiredSalaryInput = false
                     }
                 } label: {
-                    Text("Cancel")
+                    Text(NSLocalizedString("Cancel", comment: ""))
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                         .padding()
@@ -245,7 +245,7 @@ struct SalaryView: View {
                         vm.showDesiredSalaryInput = false
                     }
                 } label: {
-                    Text("Save")
+                    Text(NSLocalizedString("Save", comment: ""))
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                         .padding()

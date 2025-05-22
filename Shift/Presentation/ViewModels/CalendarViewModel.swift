@@ -111,12 +111,11 @@ final class CalendarViewModel: ObservableObject {
         error = nil
         
         do {
-            Task {
-                try await shiftUseCase.deleteShift(shift)
-                await fetchAllShifts()
-                getShiftForSelectedDate(for: selectedDate)
-                updateUI()
-            }
+            try await shiftUseCase.deleteShift(shift)
+            await fetchAllShifts()
+            getShiftForSelectedDate(for: selectedDate)
+            updateUI()
+            
         } catch {
             await MainActor.run { [weak self] in
                 self?.error = error

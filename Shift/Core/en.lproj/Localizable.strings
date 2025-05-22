@@ -1,0 +1,78 @@
+/* 
+  Localizable.strings
+  Shift
+
+  Created by cmStudent on 2025/05/22.
+  
+*/
+
+// Common
+"h" = "h";
+"OK" = "OK";
+"Cancel" = "Cancel";
+"None" = "None";
+"Save" = "Save";
+"Close" = "Close";
+"Add Shift" = "Add Shift";
+"Add Company" = "Add Company";
+"Details" = "Details";
+"Red" = "Red";
+"Green" = "Green";
+"Blue" = "Blue";
+"Orange" = "Orange";
+"Custom Pink" = "Custom Pink";
+
+// Salary View
+"Desired salary" = "Desired salary";
+"Set Desired Salary" = "Set Desired Salary";
+"Annual Salary" = "Annual Salary";
+"Enter amount" = "Enter amount";
+
+// Add New Company View
+"Settlement Day" = "Settlement Day";
+"Paid at" = "Paid at";
+"Salary" = "Salary";
+"Transport Expense" = "Transport Expense";
+"Holiday Salary" = "Holiday Salary";
+"Late Night Salary" = "Late Night Salary";
+"Late Night Rate" = "Late Night Rate";
+"Start Time" = "Start Time";
+"End Time" = "End Time";
+"Break Time" = "Break Time";
+"Color" = "Color";
+"Company Name" = "Company Name";
+"required" = "required";
+"Salary Information" = "Salary Information";
+"Base salary" = "Base salary";
+"Payment date" = "Payment date";
+"oneDay" = "One Day";
+"hourly" = "Hourly";
+"Add New Company" = "Add New Company";
+"Early Pay" = "Early Pay";
+"Late Pay" = "Late Pay";
+"If pay day is holiday, it would change" = "If pay day is holiday, it would change";
+"Applied when" = "Applied when";
+"Over Time Rate" = "Over Time Rate";
+"work_hours_and_above" = "%.2fh and above";
+"Has overtime salary" = "Has overtime salary";
+"Current Month" = "Current Month";
+"Next Month" = "Next Month";
+"Next-Next Month" = "Next-Next Month";
+"End of Month" = "End of Month";
+
+// Add Shift View
+"Company" = "Company";
+"Title" = "Title";
+"Company is required" = "Company is required";
+"Title is required" = "Title is required";
+"Do you want to close this window?" = "Do you want to close this window?";
+"If you close this window, it will be lost." = "If you close this window, it will be lost.";
+"Select Company" = "Select Company";
+
+// Error Messages
+"Invalid date range for salary calculation" = "Invalid date range for salary calculation";
+"Please check your input values. All required fields must be filled correctly." = "Please check your input values. All required fields must be filled correctly.";
+"Invalid URL" = "Invalid URL";
+"Invalid response from server" = "Invalid response from server";
+"Failed to decode response: %@" = "Failed to decode response: %@";
+"Network error: %@" = "Network error: %@"; 

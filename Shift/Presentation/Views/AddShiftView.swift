@@ -35,13 +35,13 @@ final class AddShiftViewModel: ObservableObject {
     func addShift() async -> Bool {
         guard let company else {
             // Show Alert
-            errorMessage = "Company is required"
+            errorMessage = NSLocalizedString("Company is required", comment: "")
             return false
         }
         
         guard !title.isEmpty else {
             // Show Alert
-            errorMessage = "Title is required"
+            errorMessage = NSLocalizedString("Title is required", comment: "")
             shouldFocusTitleTextField = true
             return false
         }
@@ -93,24 +93,24 @@ struct AddShiftView: View {
                         CompanySelectionView(selectedCompany: $vm.company)
                     } label: {
                         HStack {
-                            Text("Company")
+                            Text(NSLocalizedString("Company", comment: ""))
                                 .foregroundStyle(.gray)
-                            Text(vm.company?.name ?? "None")
+                            Text(vm.company?.name ?? NSLocalizedString("None", comment: ""))
                         }
                     }
                     
                     
-                    TextField("Title", text: $vm.title)
+                    TextField(NSLocalizedString("Title", comment: ""), text: $vm.title)
                         .focused($titleTextFieldIsFocused)
                 }
                 
                 
                 Section(footer: Text(vm.errorMessage ?? "").foregroundStyle(.red)) {
-                    DatePicker("Start Time", selection: $vm.startTime, displayedComponents: [.date,.hourAndMinute])
+                    DatePicker(NSLocalizedString("Start Time", comment: ""), selection: $vm.startTime, displayedComponents: [.date,.hourAndMinute])
                     
-                    DatePicker("End Time", selection: $vm.endTime, displayedComponents: [.date,.hourAndMinute])
+                    DatePicker(NSLocalizedString("End Time", comment: ""), selection: $vm.endTime, displayedComponents: [.date,.hourAndMinute])
                     
-                    DatePicker("Break Time", selection: breakDateBinding, displayedComponents: .hourAndMinute)
+                    DatePicker(NSLocalizedString("Break Time", comment: ""), selection: breakDateBinding, displayedComponents: .hourAndMinute)
                 }
                 
             }
@@ -118,11 +118,12 @@ struct AddShiftView: View {
                 titleTextFieldIsFocused = newValue
             })
             .alert(isPresented: $vm.showAlert) {
-                Alert(title: Text("Do you want to close this window?"), message: Text("If you close this window, it will be lost."),
-                      primaryButton: .destructive(Text("OK"),action: {
+                Alert(title: Text(NSLocalizedString("Do you want to close this window?", comment: "")), 
+                      message: Text(NSLocalizedString("If you close this window, it will be lost.", comment: "")),
+                      primaryButton: .destructive(Text(NSLocalizedString("OK", comment: "")),action: {
                     dismiss.callAsFunction()
                 }),
-                      secondaryButton: .default(Text("Cancel"))
+                      secondaryButton: .default(Text(NSLocalizedString("Cancel", comment: "")))
                 )
             }
             .overlay(alignment: .bottom) {
@@ -130,7 +131,7 @@ struct AddShiftView: View {
                     Button {
                         vm.showAlert.toggle()
                     } label: {
-                        Text("Cancel")
+                        Text(NSLocalizedString("Cancel", comment: ""))
                             .font(.headline)
                             .foregroundStyle(.red)
                             .padding(.horizontal)
@@ -146,7 +147,7 @@ struct AddShiftView: View {
                             }
                         }
                     } label: {
-                        Text("Add Shift")
+                        Text(NSLocalizedString("Add Shift", comment: ""))
                             .font(.headline)
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)

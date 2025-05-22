@@ -9,13 +9,13 @@ enum HolidayAPIError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidURL:
-            return "Invalid URL"
+            return NSLocalizedString("Invalid URL", comment: "")
         case .invalidResponse:
-            return "Invalid response from server"
+            return NSLocalizedString("Invalid response from server", comment: "")
         case .decodingError(let error):
-            return "Failed to decode response: \(error.localizedDescription)"
+            return String(format: NSLocalizedString("Failed to decode response: %@", comment: ""), error.localizedDescription)
         case .networkError(let error):
-            return "Network error: \(error.localizedDescription)"
+            return String(format: NSLocalizedString("Network error: %@", comment: ""), error.localizedDescription)
         }
     }
 }

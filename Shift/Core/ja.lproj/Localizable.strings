@@ -1,0 +1,78 @@
+/* 
+  Localizable.strings
+  Shift
+
+  Created by cmStudent on 2025/05/22.
+  
+*/
+
+// Common
+"h" = "時間";
+"OK" = "OK";
+"Cancel" = "キャンセル";
+"None" = "なし";
+"Save" = "保存";
+"Close" = "閉じる";
+"Add Shift" = "シフトを追加";
+"Add Company" = "会社を追加";
+"Details" = "詳細";
+"Red" = "赤";
+"Green" = "緑";
+"Blue" = "青";
+"Orange" = "オレンジ";
+"Custom Pink" = "ピンク";
+
+// Salary View
+"Desired salary" = "希望給与";
+"Set Desired Salary" = "希望給与を設定";
+"Annual Salary" = "年収";
+"Enter amount" = "金額を入力";
+
+// Add New Company View
+"Settlement Day" = "締め日";
+"Paid at" = "支払い日";
+"Salary" = "給与";
+"Transport Expense" = "交通費";
+"Holiday Salary" = "休日給";
+"Late Night Salary" = "深夜手当";
+"Late Night Rate" = "深夜手当率";
+"Start Time" = "開始時間";
+"End Time" = "終了時間";
+"Break Time" = "休憩時間";
+"Color" = "色";
+"Company Name" = "会社名";
+"required" = "必須";
+"Salary Information" = "給与情報";
+"Base salary" = "基本給";
+"Payment date" = "支払日";
+"oneDay" = "日給";
+"hourly" = "時給";
+"Add New Company" = "新規会社追加";
+"Early Pay" = "早払い";
+"Late Pay" = "遅払い";
+"If pay day is holiday, it would change" = "支払日が休日の場合は変更されます";
+"Applied when" = "適用条件";
+"Over Time Rate" = "残業手当";
+"work_hours_and_above" = "%.2f時間以上";
+"Has overtime salary" = "残業手当あり";
+"Current Month" = "当月";
+"Next Month" = "翌月";
+"Next-Next Month" = "翌々月";
+"End of Month" = "月末";
+
+// Add Shift View
+"Company" = "会社";
+"Title" = "タイトル";
+"Company is required" = "会社を選択してください";
+"Title is required" = "タイトルを入力してください";
+"Do you want to close this window?" = "このウィンドウを閉じますか？";
+"If you close this window, it will be lost." = "閉じると入力内容は失われます。";
+"Select Company" = "会社を選択";
+
+// Error Messages
+"Invalid date range for salary calculation" = "給与計算の日付範囲が無効です";
+"Please check your input values. All required fields must be filled correctly." = "入力値を確認してください。必須項目が正しく入力されている必要があります。";
+"Invalid URL" = "無効なURLです";
+"Invalid response from server" = "サーバーからの応答が無効です";
+"Failed to decode response: %@" = "レスポンスのデコードに失敗しました: %@";
+"Network error: %@" = "ネットワークエラー: %@"; 
