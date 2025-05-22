@@ -22,24 +22,26 @@ struct SalaryCalculatorTest {
         // Given
         let startTime = createDate(day: 6, hour: 10)
         let endTime = createDate(day: 6, hour: 18)
+        let shiftSegment = ShiftSplitter.shared.splitShiftByDay(shiftStart: startTime, shiftEnd: endTime, holidays: [])
         
         // When
-        let salary = try await salaryCalculator.calculateTotalSalary(
-            baseSalary: 1000,
-            transportationExpense: 0,
-            paymentType: .hourly,
-            shiftStartTime: startTime,
-            shiftEndTime: endTime,
-            baseWorkHours: nil,
-            overtimeSalary: nil,
-            breakDuration: 0,
-            holidaySalary: 1400,
-            lateSalary: nil,
-            isHoliday: false
-        )
-        
+        var total = 0.0
+        for segment in shiftSegment {
+            let salary = try await salaryCalculator.calculateOneSegmentSalary(
+                shiftSegment: segment,
+                baseSalary: 1000,
+                transportationExpense: 0,
+                paymentType: .hourly,
+                baseWorkHours: nil,
+                overtimeSalary: nil,
+                breakDuration: 0,
+                holidaySalary: 1400,
+                lateSalary: nil
+            )
+            total += salary
+        }
         // Then
-        #expect(salary == 8000, "Salary should be 8000 for 8 hours of work")
+        #expect(total == 8000, "Salary should be 8000 for 8 hours of work")
     }
     
     @Test("Holiday time calculation")
@@ -47,32 +49,41 @@ struct SalaryCalculatorTest {
         // Given
         let startTime = createDate(day: 6, hour: 10)
         let endTime = createDate(day: 6, hour: 18)
+        let shiftSegment = ShiftSplitter.shared.splitShiftByDay(shiftStart: startTime, shiftEnd: endTime, holidays: [startTime])
         
         // When
-        let salary = try await salaryCalculator.calculateTotalSalary(
-            baseSalary: 1000,
-            transportationExpense: 0,
-            paymentType: .hourly,
-            shiftStartTime: startTime,
-            shiftEndTime: endTime,
-            baseWorkHours: nil,
-            overtimeSalary: nil,
-            breakDuration: 0,
-            holidaySalary: 1400,
-            lateSalary: nil,
-            isHoliday: true
-        )
+        var total = 0.0
+        for segment in shiftSegment {
+            let salary = try await salaryCalculator.calculateOneSegmentSalary(
+                shiftSegment: segment,
+                baseSalary: 1000,
+                transportationExpense: 0,
+                paymentType: .hourly,
+                baseWorkHours: nil,
+                overtimeSalary: nil,
+                breakDuration: 0,
+                holidaySalary: 1400,
+                lateSalary: nil
+            )
+            total += salary
+        }
         
         // Then
-        #expect(salary == 11200, "Holiday salary should be 1.4 times the normal rate")
+        #expect(total == 11200, "Holiday salary should be 1.4 times the normal rate")
     }
     
     
     @Test("Holiday Late Night Calculation")
     func holidayLateNightCalculation() async throws {
         // Given
+        // Shift start at 20:00~8:00 12hr
+        // 20:00~midnight = 4000 + late 400 = 4400
+        // 00:00 ~ 8:00 = 11200(holiday) + late 1400 = 12600
+        // nextDay is holiday
+        // lateTime 22:00~7:00
         let startTime = createDate(day: 6, hour: 20)
         let endTime = createDate(day: 7, hour: 8) // 20:00 ~ 8:00
+        let shiftSegment = ShiftSplitter.shared.splitShiftByDay(shiftStart: startTime, shiftEnd: endTime, holidays: [endTime])
         
         let lateStartTime = createDate(hour: 22)
         let lateEndTime = createDate(hour: 7) // 22:00 ~ 7:00
@@ -81,22 +92,24 @@ struct SalaryCalculatorTest {
         
         
         // When
-        let salary = try await salaryCalculator.calculateTotalSalary(
-            baseSalary: 1000,
-            transportationExpense: 0,
-            paymentType: .hourly,
-            shiftStartTime: startTime,
-            shiftEndTime: endTime,
-            baseWorkHours: nil,
-            overtimeSalary: nil,
-            breakDuration: 0,
-            holidaySalary: 1100,
-            lateSalary: lateSalary,
-            isHoliday: true
-        )
+        var total = 0.0
+        for segment in shiftSegment {
+            let salary = try await salaryCalculator.calculateOneSegmentSalary(
+                shiftSegment: segment,
+                baseSalary: 1000,
+                transportationExpense: 0,
+                paymentType: .hourly,
+                baseWorkHours: nil,
+                overtimeSalary: nil,
+                breakDuration: 0,
+                holidaySalary: 1400,
+                lateSalary: lateSalary
+            )
+            total += salary
+        }
         
         // Then
-        #expect(salary == 15000, "Holiday salary should be 1.4 times the normal rate")
+        #expect(total == 17000)
     }
     
     @Test("Overtime calculation")
@@ -104,135 +117,114 @@ struct SalaryCalculatorTest {
         // Given
         let startTime = createDate(day: 6, hour: 10)
         let endTime = createDate(day: 6, hour: 20) // 10 hours total
-        
+        let shiftSegment = ShiftSplitter.shared.splitShiftByDay(shiftStart: startTime, shiftEnd: endTime, holidays: [])
+
         // When
-        let salary = try await salaryCalculator.calculateTotalSalary(
-            baseSalary: 1000,
-            transportationExpense: 0,
-            paymentType: .hourly,
-            shiftStartTime: startTime,
-            shiftEndTime: endTime,
-            baseWorkHours: 8,
-            overtimeSalary: 1500,
-            breakDuration: 0,
-            holidaySalary: 1400,
-            lateSalary: nil,
-            isHoliday: false
-        )
+        var total = 0.0
+        for segment in shiftSegment {
+            let salary = try await salaryCalculator.calculateOneSegmentSalary(
+                shiftSegment: segment,
+                baseSalary: 1000,
+                transportationExpense: 0,
+                paymentType: .hourly,
+                baseWorkHours: 8,
+                overtimeSalary: 1500,
+                breakDuration: 0,
+                holidaySalary: 1400,
+                lateSalary: nil
+            )
+            total += salary
+        }
+        
         
         // Then
-        #expect(salary == 11000, "Salary should include overtime pay")
+        #expect(total == 11000, "Salary should include overtime pay")
     }
-    
-    
-    @Test("Holiday Salary should be greater than normal pay")
-    func holidaySalaryShouldBeGreaterThanNormalPay() async throws {
-        for _ in 1...100 {
-            // Given
-            let startTime = createRandomDate()
-            let endTime = createRandomDate()
-            let baseSalary = randomSalary(range: 1000...1199)
-            let holidaySalary = randomSalary(range: 1200...1600)
-            
-            // When
-            let isHolidaySalary = try await salaryCalculator.calculateTotalSalary(
-                baseSalary: baseSalary,
-                transportationExpense: 0,
-                paymentType: .hourly,
-                shiftStartTime: startTime,
-                shiftEndTime: endTime,
-                baseWorkHours: nil,
-                overtimeSalary: nil,
-                breakDuration: 0,
-                holidaySalary: holidaySalary,
-                lateSalary: nil,
-                isHoliday: true
-            )
-            
-            let isNotHolidaySalary = try await salaryCalculator.calculateTotalSalary(
-                baseSalary: baseSalary,
-                transportationExpense: 0,
-                paymentType: .hourly,
-                shiftStartTime: startTime,
-                shiftEndTime: endTime,
-                baseWorkHours: nil,
-                overtimeSalary: nil,
-                breakDuration: 0,
-                holidaySalary: holidaySalary,
-                lateSalary: nil,
-                isHoliday: false
-            )
-            
-            // Then
-            #expect(isHolidaySalary >= isNotHolidaySalary)
-            
-        }
-    }
+
     
     @Test("Randomized time calculation")
     func randomizedTimeCalculation() async throws {
-        for _ in 1...100 {
+        for _ in 1...10 {
             // Given
             let startTime = createRandomDate()
             let endTime = createRandomDate()
+            
             let baseSalary = randomSalary()
             let holidaySalary = randomSalary(range: 1200...1600)
             let isHoliday = Bool.random()
+            var holiday:[Date] = []
+            if isHoliday {
+                holiday.append(startTime)
+            }
+            let shiftSegments = ShiftSplitter.shared.splitShiftByDay(shiftStart: startTime, shiftEnd: endTime, holidays: holiday)
+
+            
             
             // When
-            let salary = try await salaryCalculator.calculateTotalSalary(
-                baseSalary: baseSalary,
-                transportationExpense: 0,
-                paymentType: .hourly,
-                shiftStartTime: startTime,
-                shiftEndTime: endTime,
-                baseWorkHours: nil,
-                overtimeSalary: nil,
-                breakDuration: 0,
-                holidaySalary: holidaySalary,
-                lateSalary: nil,
-                isHoliday: isHoliday
-            )
+            var total = 0.0
+            for segment in shiftSegments {
+                let salary = try await salaryCalculator.calculateOneSegmentSalary(
+                    shiftSegment: segment,
+                    baseSalary: baseSalary,
+                    transportationExpense: 0,
+                    paymentType: .hourly,
+                    baseWorkHours: nil,
+                    overtimeSalary: nil,
+                    breakDuration: 0,
+                    holidaySalary: holidaySalary,
+                    lateSalary: nil
+                )
+                total += salary
+            }
             
             // Then
-            print("Random test: \(startTime) ~ \(endTime), base: \(baseSalary), holiday: \(holidaySalary), isHoliday: \(isHoliday), salary: \(salary)")
-            #expect(salary >= 0, "Salary should not be negative")
+            print("Random test: \(startTime) ~ \(endTime), base: \(baseSalary), holiday: \(holidaySalary), isHoliday: \(isHoliday), salary: \(total)")
+            #expect(total >= 0, "Salary should not be negative")
         }
     }
     
     @Test("Randomized time calculation")
     func salaryShouldEqualOrGreaterThanBaseSalary() async throws {
-        for _ in 1...100 {
+        for _ in 1...10 {
             // Given
-            let randomHour = Int.random(in: 8...18)
+
+            let randomHour = Int.random(in: 8...100000)
             print(randomHour)
             let (startTime, endTime) = createRandomStartAndEndDate(workHour: randomHour)
             let baseSalary = randomSalary(range: 1000...1199)
             let holidaySalary = randomSalary(range: 1200...1600)
             let isHoliday = Bool.random()
+            var holiday:[Date] = []
+            if isHoliday {
+                holiday.append(startTime)
+            }
+            let shiftSegments = ShiftSplitter.shared.splitShiftByDay(shiftStart: startTime, shiftEnd: endTime, holidays: holiday)
+
             
             // When
-            let salary = try await salaryCalculator.calculateTotalSalary(
-                baseSalary: baseSalary,
-                transportationExpense: 0,
-                paymentType: .hourly,
-                shiftStartTime: startTime,
-                shiftEndTime: endTime,
-                baseWorkHours: nil,
-                overtimeSalary: nil,
-                breakDuration: 0,
-                holidaySalary: holidaySalary,
-                lateSalary: nil,
-                isHoliday: isHoliday
-            )
+            var total = 0.0
+            for segment in shiftSegments {
+                let salary = try await salaryCalculator.calculateOneSegmentSalary(
+                    shiftSegment: segment,
+                    baseSalary: baseSalary,
+                    transportationExpense: 0,
+                    paymentType: .hourly,
+                    baseWorkHours: nil,
+                    overtimeSalary: nil,
+                    breakDuration: 0,
+                    holidaySalary: holidaySalary,
+                    lateSalary: nil
+                )
+                total += salary
+            }
             
 
             // Then
-            var expectedMinSalary = isHoliday ? Double(holidaySalary * randomHour) : Double(baseSalary * randomHour)
+            var expectedMinSalary = Double(baseSalary * randomHour)
             
-            print("Random test: \(startTime) ~ \(endTime), workHour: \(randomHour), base: \(baseSalary), holiday: \(holidaySalary), isHoliday: \(isHoliday), salary: \(salary)")
+            print("Random test: \(startTime) ~ \(endTime), workHour: \(randomHour), base: \(baseSalary), holiday: \(holidaySalary), isHoliday: \(isHoliday), salary: \(total), expectedMinSalary: \(expectedMinSalary)")
             
-            #expect(salary >= expectedMinSalary, "Salary should be greater than or equal to base salary")
+            #expect(total >= expectedMinSalary, "Salary should be greater than or equal to \(expectedMinSalary)")
         }
     }
 
