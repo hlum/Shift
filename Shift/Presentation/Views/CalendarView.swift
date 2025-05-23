@@ -80,6 +80,7 @@ struct CalendarView: View {
             // On Dismiss
             Task { @MainActor in
                 await vm.fetchAllShifts()
+                await vm.getSalaryDate()
                 vm.getShiftForSelectedDate(for: vm.selectedDate)
                 vm.updateUI()
             }

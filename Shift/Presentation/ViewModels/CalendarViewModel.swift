@@ -15,6 +15,9 @@ final class CalendarViewModel: ObservableObject {
     @Published var shiftsForSelectedDate: [Shift] = []
     @Published var allShifts: [Shift] = []
     
+    
+    @Published var salaryDates: [(date: Date, colorName: ColorName)] = []
+    
     @Published var holidaysForSelectedDate: [Holiday] = []
     @Published var publicHolidays: [Holiday] = []
     
@@ -38,6 +41,7 @@ final class CalendarViewModel: ObservableObject {
 
         Task {
             await fetchAllShifts()
+            await getSalaryDate()
             await self.getShiftForSelectedDate(for: Date())
         }
         fetchAllHolidays()
@@ -75,9 +79,58 @@ final class CalendarViewModel: ObservableObject {
             self.isLoading = false
             print("Error fetching shifts: \(error.localizedDescription)")
         }
-        
     }
     
+    @MainActor
+    func getSalaryDate() async {
+        let shiftsWithDifferentMonths = self.getShiftsWithDifferentMonths(from: self.allShifts)
+        print("Shift with different count: \(shiftsWithDifferentMonths.count)")
+        for shift in shiftsWithDifferentMonths {
+            let holidayPayChange: Bool = shift.company.payDay.holidayPayDayChange
+            let holidayPayEarly: Bool = shift.company.payDay.holidayPayEarly
+            print("HolidayPayEarly: \(holidayPayEarly)")
+            let payTiming = shift.company.payDay.payTiming
+            let color: ColorName = shift.company.color
+            
+            let components = Calendar.current.dateComponents([.year,. month], from: shift.startTime)
+            let workYear: Int = components.year ?? 0
+            let workMonth: Int = components.month ?? 0
+            
+            let plainPayDay: Date = shift.company.payDay.payDay.payDate(forWorkMonth: workMonth, workYear: workYear, payTiming: payTiming)!
+
+            let salaryDate = await payDayUseCase.getActualPayDay(holidayPayChange: holidayPayChange , holidayPayEarly: holidayPayEarly, plainPayDay: plainPayDay)
+            print("Salary Dates: \(salaryDate.formatted(.dateTime.month().day().hour().minute().second()))")
+
+            self.salaryDates.append((salaryDate, color))
+        }
+    }
+    
+    private func getShiftsWithDifferentMonths(from shifts: [Shift]) -> [Shift] {
+        guard !shifts.isEmpty else {
+            Logger.standard.warning("There is no shifts")
+            return []
+        }
+        var seenMonthsCompany = Set<String>()
+
+        var result: [Shift] = []
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM" // Use year and month to handle multiple years
+
+        for shift in shifts {
+            let monthKey = formatter.string(from: shift.startTime)
+            let companyName = shift.company.name
+            let monthKeyCompany = "\(companyName)-\(monthKey)"
+            
+            
+            if !seenMonthsCompany.contains(monthKeyCompany) {
+                seenMonthsCompany.insert(monthKeyCompany)
+                result.append(shift)
+            }
+        }
+        return result
+    }
+
+
     @MainActor
     func getShiftForSelectedDate(for date: Date) {
         isLoading = true
@@ -115,6 +168,7 @@ final class CalendarViewModel: ObservableObject {
         do {
             try await shiftUseCase.deleteShift(shift)
             await fetchAllShifts()
+            await getSalaryDate()
             getShiftForSelectedDate(for: selectedDate)
             updateUI()
             
@@ -138,7 +192,8 @@ extension CalendarViewModel {
     static func preview() -> CalendarViewModel {
         let viewModel = CalendarViewModel(
             shiftUseCase: MockShiftUseCase(),
-            holidayUseCase: MockHolidayUseCase()
+            holidayUseCase: MockHolidayUseCase(),
+            paydayUseCase: MockPayDayUseCase()
         )
         
         return viewModel
