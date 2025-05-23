@@ -54,6 +54,35 @@ class HolidayUseCase {
         }
     }
     
+    
+    func getDateBeforeHoliday(_ date: Date) async -> Date {
+        var currentDate = date
+        
+        while await isWeekendOrHoliday(currentDate) {
+            currentDate = Calendar.current.date(byAdding: .day, value: -1, to: currentDate)!
+        }
+        
+        return currentDate
+    }
+    
+    
+    func getDateAfterHoliday(_ date: Date) async -> Date {
+        var currentDate = date
+        
+        while await isWeekendOrHoliday(currentDate) {
+            currentDate = Calendar.current.date(byAdding: .day, value: 1, to: currentDate)!
+        }
+        
+        return currentDate
+    }
+    
+    
+    private func isWeekendOrHoliday(_ date: Date) async -> Bool {
+        let holidayCount = await fetchHoliday(for: date)
+        return isWeekend(date) || holidayCount.count > 0
+    }
+    
+    
     func isWeekend(_ date: Date) -> Bool {
         return Calendar.current.isDateInWeekend(date)
     }
