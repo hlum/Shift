@@ -7,36 +7,63 @@
 
 import Foundation
 
+/// Represents a salary payment day with associated company and amount
+struct SalaryDay: Identifiable {
+    let id: String = UUID().uuidString
+    let date: Date
+    let company: Company
+    let amount: Double
+}
+
 protocol PayDayUseCaseProtocol {
-    func getSalaryDates(differentMonthAndCompanyShifts shifts: [Shift]) async -> [Date]
+    func getSalaryDays(differentMonthAndCompanyShifts shifts: [Shift]) async throws -> [SalaryDay]
 }
 
 class PayDayUseCase: PayDayUseCaseProtocol {
     private let holidayUseCase: HolidayUseCaseProtocol
+    private let salaryUseCase: SalaryUseCaseProtocol
+    private let shiftUseCase: ShiftUseCaseProtocol
     
-    init(holidayUseCase: HolidayUseCaseProtocol) {
+    init(holidayUseCase: HolidayUseCaseProtocol, salaryUseCase: SalaryUseCaseProtocol, shiftUseCase: ShiftUseCaseProtocol) {
         self.holidayUseCase = holidayUseCase
+        self.salaryUseCase = salaryUseCase
+        self.shiftUseCase = shiftUseCase
     }
     
-    func getSalaryDates(differentMonthAndCompanyShifts shifts: [Shift]) async -> [Date] {
-        var salaryDates: [Date] = []
+    func getSalaryDays(differentMonthAndCompanyShifts shifts: [Shift]) async throws -> [SalaryDay] {
+        var salaryDays: [SalaryDay] = []
         
         for shift in shifts {
-            let holidayPayChange: Bool = shift.company.payDay.holidayPayDayChange
-            let holidayPayEarly: Bool = shift.company.payDay.holidayPayEarly
-            let payTiming = shift.company.payDay.payTiming
-            let color: ColorName = shift.company.color
+            let salaryDate = await getSalaryDate(shift: shift)
+            let lastMonthShifts = try await shiftUseCase.getLastMonthShiftsBeforeSettlementDate(company: shift.company, currentDate: salaryDate)
+            let salary = try await salaryUseCase.calculateMonthlySalary(for: lastMonthShifts, countryCode: "US")
             
-            let components = Calendar.current.dateComponents([.year,. month], from: shift.startTime)
-            let workYear: Int = components.year ?? 0
-            let workMonth: Int = components.month ?? 0
-            let plainPayDay: Date = shift.company.payDay.payDay.payDate(forWorkMonth: workMonth, workYear: workYear, payTiming: payTiming)!
-            
-            let salaryDate = await self.getActualPayDay(holidayPayChange: holidayPayChange , holidayPayEarly: holidayPayEarly, plainPayDay: plainPayDay)
-            salaryDates.append(salaryDate)
+            let salaryDay = SalaryDay(
+                date: salaryDate,
+                company: shift.company,
+                amount: salary
+            )
+            salaryDays.append(salaryDay)
         }
         
-        return salaryDates
+        return salaryDays
+    }
+    
+    
+    
+    private func getSalaryDate(shift: Shift) async -> Date {
+        let holidayPayChange: Bool = shift.company.payDay.holidayPayDayChange
+        let holidayPayEarly: Bool = shift.company.payDay.holidayPayEarly
+        let payTiming = shift.company.payDay.payTiming
+        let color: ColorName = shift.company.color
+        
+        let components = Calendar.current.dateComponents([.year, .month], from: shift.startTime)
+        let workYear: Int = components.year ?? 0
+        let workMonth: Int = components.month ?? 0
+        let plainPayDay: Date = shift.company.payDay.payDay.payDate(forWorkMonth: workMonth, workYear: workYear, payTiming: payTiming)!
+        
+        let salaryDate = await self.getActualPayDay(holidayPayChange: holidayPayChange , holidayPayEarly: holidayPayEarly, plainPayDay: plainPayDay)
+        return salaryDate
     }
     
     
@@ -91,10 +118,11 @@ class PayDayUseCase: PayDayUseCaseProtocol {
 
 class MockPayDayUseCase: PayDayUseCase {
     init() {
-        super.init(holidayUseCase: MockHolidayUseCase())
+        super.init(holidayUseCase: MockHolidayUseCase(), salaryUseCase: MockSalaryUseCase(), shiftUseCase: MockShiftUseCase())
     }
     
-    override func getSalaryDates(differentMonthAndCompanyShifts shifts: [Shift]) async -> [Date] {
-        return shifts.map { $0.startTime }
+    override
+    func getSalaryDays(differentMonthAndCompanyShifts shifts: [Shift]) async throws -> [SalaryDay] {
+        return []
     }
 }
