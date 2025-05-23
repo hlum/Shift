@@ -82,16 +82,28 @@ class ShiftUseCase: ShiftUseCaseProtocol {
             return []
         }
         var seenMonthsCompany = Set<String>()
-
         var result: [Shift] = []
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM" // Use year and month to handle multiple years
 
         for shift in shifts {
-            let monthKey = formatter.string(from: shift.startTime)
+            // Get the month key based on the settlement date's month
+            let settlementDate = shift.company.settleMentDate.toDate(
+                forMonth: Calendar.current.component(.month, from: shift.startTime),
+                year: Calendar.current.component(.year, from: shift.startTime)
+            )!
+            
+            // If the shift's start time is after the settlement date, it belongs to the next month's salary
+            let monthKey: String
+            if shift.startTime > settlementDate {
+                let nextMonth = Calendar.current.date(byAdding: .month, value: 1, to: shift.startTime)!
+                monthKey = formatter.string(from: nextMonth)
+            } else {
+                monthKey = formatter.string(from: shift.startTime)
+            }
+            
             let companyName = shift.company.name
             let monthKeyCompany = "\(companyName)-\(monthKey)"
-            
             
             if !seenMonthsCompany.contains(monthKeyCompany) {
                 seenMonthsCompany.insert(monthKeyCompany)
