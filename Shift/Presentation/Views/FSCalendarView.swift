@@ -15,7 +15,7 @@ struct FSCalendarView: UIViewRepresentable {
     @Binding var needToUpdateUI: Bool
     @Binding var publicHolidays: [Holiday]
     @Binding var shifts: [Shift]
-    @Binding var salaryDates: [Date]
+    @Binding var salaryDates: [SalaryDay]
     @Environment(\.container) private var container
     @Environment(\.locale) private var locale
 
@@ -86,7 +86,7 @@ struct FSCalendarView: UIViewRepresentable {
         
         func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, fillDefaultColorFor date: Date) -> UIColor? {
             // Find the SalaryDate for the given date
-            if let salaryDate = parent.salaryDates.first(where: { Calendar.current.isDate($0, inSameDayAs: date) }) {
+            if let salaryDate = parent.salaryDates.first(where: { Calendar.current.isDate($0.date, inSameDayAs: date) }) {
                 return .brown
             }
             return nil
