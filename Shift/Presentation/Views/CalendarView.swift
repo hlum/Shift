@@ -31,7 +31,8 @@ struct CalendarView: View {
                 selectedDate: $vm.selectedDate,
                 needToUpdateUI: $vm.needToUpdateUI,
                 publicHolidays: $vm.publicHolidays,
-                shifts: $vm.allShifts
+                shifts: $vm.allShifts,
+                salaryDates: $vm.salaryDates
             )
             .frame(maxWidth: .infinity)
 

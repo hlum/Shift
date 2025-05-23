@@ -50,6 +50,7 @@
 				Domain/Repositories/ShiftRepository.swift,
 				UseCases/CompanyUseCase.swift,
 				UseCases/HolidayUseCase.swift,
+				UseCases/PayDayUseCase.swift,
 				UseCases/ShiftUseCase.swift,
 			);
 			target = 7F0D75922DD70FD50061261B /* ShiftTests */;
@@ -193,6 +194,7 @@
 			knownRegions = (
 				en,
 				Base,
+				ja,
 			);
 			mainGroup = 7F21139F2DC44BF90003B79F;
 			minimizedProjectReferenceProxies = 1;
