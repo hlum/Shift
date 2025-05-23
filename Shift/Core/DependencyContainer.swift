@@ -12,6 +12,7 @@ protocol ContainerProtocol {
     var companyUseCase: CompanyUseCase { get }
     var holidayUseCase: HolidayUseCase { get }
     var salaryUseCase: SalaryUseCaseProtocol { get }
+    var payDayUseCase: PayDayUseCase { get }
 }
 
 // MARK: - Container
@@ -54,6 +55,10 @@ final class DependencyContainer: ContainerProtocol {
     
     var salaryUseCase: SalaryUseCaseProtocol {
         SalaryUseCase(holidayUseCase: holidayUseCase)
+    }
+    
+    var payDayUseCase: PayDayUseCase {
+        PayDayUseCase(holidayUseCase: holidayUseCase)
     }
 }
 
