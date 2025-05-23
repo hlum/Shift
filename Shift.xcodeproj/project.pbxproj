@@ -30,7 +30,6 @@
 		7F0D75A82DD710CD0061261B /* Exceptions for "Shift" folder in "ShiftTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Core/Logger/Logger.swift,
 				Data/Mock/MockCompanyRepository.swift,
 				Data/Mock/MockHolidayRepo.swift,
 				Data/Mock/MockShiftRepository.swift,
@@ -48,6 +47,7 @@
 				Domain/Repositories/CompanyRepository.swift,
 				Domain/Repositories/HolidayRepository.swift,
 				Domain/Repositories/ShiftRepository.swift,
+				Helper/Logger/Logger.swift,
 				UseCases/CompanyUseCase.swift,
 				UseCases/HolidayUseCase.swift,
 				UseCases/PayDayUseCase.swift,

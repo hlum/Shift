@@ -14,12 +14,10 @@ class PayDayUseCase {
         self.holidayUseCase = holidayUseCase
     }
     
-    func getSalaryDates(for shifts: [Shift]) async -> [Date] {
+    func getSalaryDates(differentMonthAndCompanyShifts shifts: [Shift]) async -> [Date] {
         var salaryDates: [Date] = []
         
-        let shiftsWithDifferentMonths = self.getShiftsWithDifferentMonths(from: shifts)
-        
-        for shift in shiftsWithDifferentMonths {
+        for shift in shifts {
             let holidayPayChange: Bool = shift.company.payDay.holidayPayDayChange
             let holidayPayEarly: Bool = shift.company.payDay.holidayPayEarly
             let payTiming = shift.company.payDay.payTiming
@@ -36,6 +34,8 @@ class PayDayUseCase {
         
         return salaryDates
     }
+    
+    
     
     private func getActualPayDay(
         holidayPayChange: Bool,
@@ -90,7 +90,7 @@ class MockPayDayUseCase: PayDayUseCase {
         super.init(holidayUseCase: MockHolidayUseCase())
     }
     
-    override func getSalaryDates(for shifts: [Shift]) async -> [Date] {
+    override func getSalaryDates(differentMonthAndCompanyShifts shifts: [Shift]) async -> [Date] {
         return shifts.map { $0.startTime }
     }
 }

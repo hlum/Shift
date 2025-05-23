@@ -83,7 +83,8 @@ final class CalendarViewModel: ObservableObject {
     
     @MainActor
     func getSalaryDate() async {
-        self.salaryDates = await payDayUseCase.getSalaryDates(for: allShifts)
+        let differentMonthAndCompanyShifts = shiftUseCase.getShiftsWithDifferentMonthsAndCompany(from: allShifts)
+        self.salaryDates = await payDayUseCase.getSalaryDates(differentMonthAndCompanyShifts: differentMonthAndCompanyShifts)
     }
     
 
@@ -103,6 +104,7 @@ final class CalendarViewModel: ObservableObject {
         }
         
     }
+    
     
     @MainActor
     func getHoliday(for date: Date) {
