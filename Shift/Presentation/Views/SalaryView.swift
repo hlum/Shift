@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 final class SalaryViewModel: ObservableObject {
-    private let shiftUseCase: ShiftUseCase
+    private let shiftUseCase: ShiftUseCaseProtocol
     private let salaryUseCase: SalaryUseCaseProtocol
     
     @Published var selectedDate: Date = Date()
@@ -22,7 +22,7 @@ final class SalaryViewModel: ObservableObject {
     let countryCode: String
     
     init(
-        shiftUseCase: ShiftUseCase,
+        shiftUseCase: ShiftUseCaseProtocol,
         salaryUseCase: SalaryUseCaseProtocol,
         countryCode: String?
     ) {
@@ -83,7 +83,7 @@ struct SalaryView: View {
     @Environment(\.locale) private var locale
     
     init(
-        shiftUseCase: ShiftUseCase = MockShiftUseCase(),
+        shiftUseCase: ShiftUseCaseProtocol = MockShiftUseCase(),
         salaryUseCase: SalaryUseCaseProtocol = MockSalaryUseCase(),
         locale: Locale? = .current
     ) {

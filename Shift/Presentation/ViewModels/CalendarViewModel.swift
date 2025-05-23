@@ -29,11 +29,11 @@ final class CalendarViewModel: ObservableObject {
     
     @Published var error: Error?
     
-    private let shiftUseCase: ShiftUseCase
-    private let holidayUseCase: HolidayUseCase
-    private let payDayUseCase: PayDayUseCase
+    private let shiftUseCase: ShiftUseCaseProtocol
+    private let holidayUseCase: HolidayUseCaseProtocol
+    private let payDayUseCase: PayDayUseCaseProtocol
     
-    init(shiftUseCase: ShiftUseCase, holidayUseCase: HolidayUseCase, paydayUseCase: PayDayUseCase) {
+    init(shiftUseCase: ShiftUseCaseProtocol, holidayUseCase: HolidayUseCaseProtocol, paydayUseCase: PayDayUseCaseProtocol) {
         self.shiftUseCase = shiftUseCase
         self.holidayUseCase = holidayUseCase
         self.payDayUseCase = paydayUseCase
@@ -71,7 +71,7 @@ final class CalendarViewModel: ObservableObject {
         error = nil
         
         do {
-            self.allShifts = try await shiftUseCase.fetchShifts()
+            self.allShifts = try await shiftUseCase.fetchShifts(descriptor: nil)
             self.isLoading = false
             self.error = nil
         } catch {

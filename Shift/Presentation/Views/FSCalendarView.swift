@@ -68,12 +68,12 @@ struct FSCalendarView: UIViewRepresentable {
     class Coordinator: NSObject, FSCalendarDelegate, FSCalendarDataSource, FSCalendarDelegateAppearance {
         weak var calendar: FSCalendar?
         var parent: FSCalendarView
-        var shiftUseCase: ShiftUseCase
-        var holidayUseCase: HolidayUseCase
+        var shiftUseCase: ShiftUseCaseProtocol
+        var holidayUseCase: HolidayUseCaseProtocol
         let dateFormatter = DateFormatter()
 
         
-        init(parent: FSCalendarView, shiftUseCase: ShiftUseCase, holidayUseCase: HolidayUseCase) {
+        init(parent: FSCalendarView, shiftUseCase: ShiftUseCaseProtocol, holidayUseCase: HolidayUseCaseProtocol) {
             self.parent = parent
             self.shiftUseCase = shiftUseCase
             self.holidayUseCase = holidayUseCase

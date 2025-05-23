@@ -5,17 +5,20 @@
 //  Created by cmStudent on 2025/05/14.
 //
 
+
 import Foundation
 
 protocol HolidayUseCaseProtocol {
     func fetchHolidays() async -> [Holiday]
-    func fetchHolidays(between dateInterval: DateInterval, countryCode: String) async -> [Holiday]
-    func fetchHolidaysAndWeekends(between dateInterval: DateInterval, countryCode: String) async -> [Date]
+    func fetchHolidays(between dateInterval: DateInterval) async -> [Holiday]
+    func fetchHolidaysAndWeekends(between dateInterval: DateInterval) async -> [Date]
     func isWeekend(_ date: Date) -> Bool
     func fetchWeekend(between dateInterval: DateInterval) -> [Date]
+    func getDateBeforeHoliday(_ date: Date) async -> Date
+    func getDateAfterHoliday(_ date: Date) async -> Date
 }
 
-class HolidayUseCase {
+class HolidayUseCase: HolidayUseCaseProtocol{
     private let holidayRepository: HolidayRepository
     
     private let countryCode: String = Locale.current.region?.identifier ?? "US"
@@ -32,6 +35,16 @@ class HolidayUseCase {
             return []
         }
     }
+    
+    func fetchHolidays(between dateInterval: DateInterval) async -> [Holiday] {
+        do {
+            return try await holidayRepository.fetchHolidays(between: dateInterval, countryCode: countryCode)
+        } catch {
+            print("Error fetching holidays: \(error.localizedDescription)")
+            return []
+        }
+    }
+
     
     
     func fetchHolidaysAndWeekends(between dateInterval: DateInterval) async -> [Date] {
@@ -69,7 +82,7 @@ class HolidayUseCase {
     
     
     private func isWeekendOrHoliday(_ date: Date) async -> Bool {
-        let holidayCount = await fetchHoliday(for: date)
+        let holidayCount = await fetchHolidays(between: DateInterval(start: date, end: date.startOfNextDay()))
         return isWeekend(date) || holidayCount.count > 0
     }
     

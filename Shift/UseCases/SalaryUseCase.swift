@@ -5,10 +5,10 @@ protocol SalaryUseCaseProtocol {
 }
 
 final class SalaryUseCase: SalaryUseCaseProtocol {
-    private let holidayUseCase: HolidayUseCase
+    private let holidayUseCase: HolidayUseCaseProtocol
     private let salaryCalculator: SalaryCalculator
     
-    init(holidayUseCase: HolidayUseCase, salaryCalculator: SalaryCalculator = SalaryCalculatorImpl()) {
+    init(holidayUseCase: HolidayUseCaseProtocol, salaryCalculator: SalaryCalculator = SalaryCalculatorImpl()) {
         self.holidayUseCase = holidayUseCase
         self.salaryCalculator = salaryCalculator
     }

@@ -7,10 +7,14 @@
 
 import Foundation
 
-class PayDayUseCase {
-    private let holidayUseCase: HolidayUseCase
+protocol PayDayUseCaseProtocol {
+    func getSalaryDates(differentMonthAndCompanyShifts shifts: [Shift]) async -> [Date]
+}
+
+class PayDayUseCase: PayDayUseCaseProtocol {
+    private let holidayUseCase: HolidayUseCaseProtocol
     
-    init(holidayUseCase: HolidayUseCase) {
+    init(holidayUseCase: HolidayUseCaseProtocol) {
         self.holidayUseCase = holidayUseCase
     }
     

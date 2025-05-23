@@ -8,11 +8,11 @@ protocol ContainerProtocol {
     var shiftRepository: ShiftRepository { get }
     var companyRepository: CompanyRepository { get }
     var holidayRepository: HolidayRepository { get }
-    var shiftUseCase: ShiftUseCase { get }
+    var shiftUseCase: ShiftUseCaseProtocol { get }
     var companyUseCase: CompanyUseCaseProtocol { get }
-    var holidayUseCase: HolidayUseCase { get }
+    var holidayUseCase: HolidayUseCaseProtocol { get }
     var salaryUseCase: SalaryUseCaseProtocol { get }
-    var payDayUseCase: PayDayUseCase { get }
+    var payDayUseCase: PayDayUseCaseProtocol { get }
 }
 
 // MARK: - Container
@@ -41,7 +41,7 @@ final class DependencyContainer: ContainerProtocol {
         SwiftDataHolidayRepository(context: modelContext, apiClient: HolidayAPIClient())
     }
     
-    var shiftUseCase: ShiftUseCase {
+    var shiftUseCase: ShiftUseCaseProtocol {
         ShiftUseCase(shiftRepository: shiftRepository)
     }
     
@@ -49,7 +49,7 @@ final class DependencyContainer: ContainerProtocol {
         CompanyUseCase(companyRepository: companyRepository)
     }
     
-    var holidayUseCase: HolidayUseCase {
+    var holidayUseCase: HolidayUseCaseProtocol {
         HolidayUseCase(holidayRepository: holidayRepository)
     }
     
@@ -57,7 +57,7 @@ final class DependencyContainer: ContainerProtocol {
         SalaryUseCase(holidayUseCase: holidayUseCase)
     }
     
-    var payDayUseCase: PayDayUseCase {
+    var payDayUseCase: PayDayUseCaseProtocol {
         PayDayUseCase(holidayUseCase: holidayUseCase)
     }
 }

@@ -8,7 +8,20 @@
 import Foundation
 import SwiftData
 
-class ShiftUseCase {
+
+protocol ShiftUseCaseProtocol {
+    func fetchShifts(
+        descriptor: FetchDescriptor<Shift>?
+    ) async throws -> [Shift]
+    
+    func addShift(_ shift: Shift) async throws
+    func updateShift(_ shift: Shift) async throws
+    func deleteShift(_ shift: Shift) async throws
+    func getLastMonthShiftBeforeSettlementDate(settlementDate: SettlementDate, currentDate: Date) async throws -> [Shift]
+    func getShiftsWithDifferentMonthsAndCompany(from shifts: [Shift]) -> [Shift]
+}
+
+class ShiftUseCase: ShiftUseCaseProtocol {
     private let shiftRepository: ShiftRepository
     
     init(shiftRepository: ShiftRepository) {
@@ -17,11 +30,11 @@ class ShiftUseCase {
     
     
     func fetchShifts(
-        descriptor: FetchDescriptor<Shift> = FetchDescriptor<Shift>()
+        descriptor: FetchDescriptor<Shift>?
     ) async throws -> [Shift] {
         return try await shiftRepository
             .fetchShifts(
-                descriptor: descriptor
+                descriptor: descriptor ?? FetchDescriptor<Shift>()
             )
     }
     

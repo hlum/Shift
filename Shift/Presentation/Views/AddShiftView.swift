@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 final class AddShiftViewModel: ObservableObject {
-    private let shiftUseCase: ShiftUseCase
+    private let shiftUseCase: ShiftUseCaseProtocol
     
     @Published var company: Company? = nil
     @Published var title: String = ""
@@ -26,7 +26,7 @@ final class AddShiftViewModel: ObservableObject {
     
     
     
-    init(shiftUseCase: ShiftUseCase) {
+    init(shiftUseCase: ShiftUseCaseProtocol) {
         self.shiftUseCase = shiftUseCase
     }
     
@@ -66,7 +66,7 @@ struct AddShiftView: View {
     
     @FocusState var titleTextFieldIsFocused: Bool
 
-    init(shiftUseCase: ShiftUseCase = MockShiftUseCase(), selectedDate: Binding<Date>) {
+    init(shiftUseCase: ShiftUseCaseProtocol = MockShiftUseCase(), selectedDate: Binding<Date>) {
         _vm = .init(wrappedValue: .init(shiftUseCase: shiftUseCase))
         _selectedDate = selectedDate
     }
