@@ -17,7 +17,7 @@ protocol ShiftUseCaseProtocol {
     func addShift(_ shift: Shift) async throws
     func updateShift(_ shift: Shift) async throws
     func deleteShift(_ shift: Shift) async throws
-    func getLastMonthShiftBeforeSettlementDate(settlementDate: SettlementDate, currentDate: Date) async throws -> [Shift]
+    func getLastMonthShiftsBeforeSettlementDate(company: Company, currentDate: Date) async throws -> [Shift]
     func getShiftsWithDifferentMonthsAndCompany(from shifts: [Shift]) -> [Shift]
 }
 
@@ -29,13 +29,8 @@ class ShiftUseCase: ShiftUseCaseProtocol {
     }
     
     
-    func fetchShifts(
-        descriptor: FetchDescriptor<Shift>?
-    ) async throws -> [Shift] {
-        return try await shiftRepository
-            .fetchShifts(
-                descriptor: descriptor ?? FetchDescriptor<Shift>()
-            )
+    func fetchShifts(descriptor: FetchDescriptor<Shift>?) async throws -> [Shift] {
+        return try await shiftRepository.fetchShifts(descriptor: descriptor ?? FetchDescriptor<Shift>())
     }
     
     
@@ -54,17 +49,23 @@ class ShiftUseCase: ShiftUseCaseProtocol {
     }
     
     
-    func getLastMonthShiftBeforeSettlementDate(settlementDate: SettlementDate, currentDate: Date) async throws -> [Shift] {
+    func getLastMonthShiftsBeforeSettlementDate(company: Company, currentDate: Date) async throws -> [Shift] {
         
-        let settlementDateForLastMonth = getSettlementDateOfLastMonth(settlementDate: settlementDate, currentDate: currentDate)
+        let settlementDateForLastMonth = getSettlementDateOfLastMonth(settlementDate: company.settleMentDate, currentDate: currentDate)
+        
         let startOfLastMonth = settlementDateForLastMonth.startOfMonth()
         
+        let companyId = company.id
+        
         let predicate = #Predicate<Shift> { shift in
-            shift.startTime >= startOfLastMonth && shift.startTime < settlementDateForLastMonth
+            return (shift.startTime >= startOfLastMonth && shift.startTime <= settlementDateForLastMonth) && (shift.company.id == companyId)
         }
+        
         let descriptor = FetchDescriptor<Shift>(predicate: predicate)
         
-        return try await self.fetchShifts(descriptor: descriptor)
+        let results = try await self.fetchShifts(descriptor: descriptor)
+        
+        return results
         
     }
     

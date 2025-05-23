@@ -47,6 +47,7 @@
 				Domain/Repositories/CompanyRepository.swift,
 				Domain/Repositories/HolidayRepository.swift,
 				Domain/Repositories/ShiftRepository.swift,
+				"Helper/Date+Extensions.swift",
 				Helper/Logger/Logger.swift,
 				UseCases/CompanyUseCase.swift,
 				UseCases/HolidayUseCase.swift,
