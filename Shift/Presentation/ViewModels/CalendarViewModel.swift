@@ -15,8 +15,8 @@ final class CalendarViewModel: ObservableObject {
     @Published var shiftsForSelectedDate: [Shift] = []
     @Published var allShifts: [Shift] = []
     
-    
-    @Published var salaryDates: [Date] = []
+    @Published var allSalaryDays: [SalaryDay] = []
+    @Published var salaryDaysForSelectedDate: [SalaryDay] = []
     
     @Published var holidaysForSelectedDate: [Holiday] = []
     @Published var publicHolidays: [Holiday] = []
@@ -60,6 +60,7 @@ final class CalendarViewModel: ObservableObject {
                 Task {
                     await self?.getShiftForSelectedDate(for: date)
                     await self?.getHoliday(for: date)
+                    await self?.fetchSalaryDay(selectedDate: date)
                 }
             }
             .store(in: &cancellables)
@@ -84,11 +85,28 @@ final class CalendarViewModel: ObservableObject {
     @MainActor
     func getSalaryDate() async {
         let differentMonthAndCompanyShifts = shiftUseCase.getShiftsWithDifferentMonthsAndCompany(from: allShifts)
-        self.salaryDates = await payDayUseCase.getSalaryDates(differentMonthAndCompanyShifts: differentMonthAndCompanyShifts)
+        do {
+            self.allSalaryDays = try await payDayUseCase.getSalaryDays(differentMonthAndCompanyShifts: differentMonthAndCompanyShifts)
+        } catch {
+            Logger.standard.error("Can't get salaryDay date: \(error.localizedDescription)")
+        }
     }
     
-
-
+    @MainActor
+    private func fetchSalaryDay(selectedDate: Date) {
+        guard !allSalaryDays.isEmpty else {
+            Logger.standard.warning("SalaryDays is empty.")
+            return
+        }
+        
+        do {
+            let result = allSalaryDays.filter { $0.date == selectedDate }
+            self.salaryDaysForSelectedDate = result
+        } catch {
+            Logger.standard.error("Error filtering salary days: \(error.localizedDescription)")
+            self.salaryDaysForSelectedDate = []
+        }
+    }
 
     @MainActor
     func getShiftForSelectedDate(for date: Date) {
@@ -130,6 +148,7 @@ final class CalendarViewModel: ObservableObject {
             await fetchAllShifts()
             await getSalaryDate()
             getShiftForSelectedDate(for: selectedDate)
+            fetchSalaryDay(selectedDate: selectedDate)
             updateUI()
             
         } catch {
