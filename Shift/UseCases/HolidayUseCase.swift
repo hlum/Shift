@@ -7,6 +7,14 @@
 
 import Foundation
 
+protocol HolidayUseCaseProtocol {
+    func fetchHolidays() async -> [Holiday]
+    func fetchHolidays(between dateInterval: DateInterval, countryCode: String) async -> [Holiday]
+    func fetchHolidaysAndWeekends(between dateInterval: DateInterval, countryCode: String) async -> [Date]
+    func isWeekend(_ date: Date) -> Bool
+    func fetchWeekend(between dateInterval: DateInterval) -> [Date]
+}
+
 class HolidayUseCase {
     private let holidayRepository: HolidayRepository
     
@@ -25,25 +33,8 @@ class HolidayUseCase {
         }
     }
     
-    func fetchHoliday(for date: Date) async -> [Holiday] {
-        do {
-            return try await holidayRepository.fetchHolidays(for: date, countryCode: countryCode)
-        } catch {
-            print("Error fetching holidays: \(error.localizedDescription)")
-            return []
-        }
-    }
     
-    func fetchHolidays(between dateInterval: DateInterval, countryCode: String) async -> [Holiday] {
-        do {
-            return try await holidayRepository.fetchHolidays(between: dateInterval, countryCode: countryCode)
-        } catch {
-            print("Error fetching holidays: \(error.localizedDescription)")
-            return []
-        }
-    }
-    
-    func fetchHolidaysAndWeekends(between dateInterval: DateInterval, countryCode: String) async -> [Date] {
+    func fetchHolidaysAndWeekends(between dateInterval: DateInterval) async -> [Date] {
         do {
             let holidays = try await holidayRepository.fetchHolidays(between: dateInterval, countryCode: countryCode).map{$0.date}
             let weekends = fetchWeekend(between: dateInterval)

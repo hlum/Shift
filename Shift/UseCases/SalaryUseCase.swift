@@ -22,8 +22,7 @@ final class SalaryUseCase: SalaryUseCaseProtocol {
                 let salary = company.salary
                 
                 let holidays = await holidayUseCase.fetchHolidaysAndWeekends(
-                    between: DateInterval(start: shift.startTime, end: shift.endTime),
-                    countryCode: countryCode
+                    between: DateInterval(start: shift.startTime, end: shift.endTime)
                 )
                 
                 let segments = ShiftSplitter.shared.splitShiftByDay(
