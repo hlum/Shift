@@ -9,7 +9,7 @@ protocol ContainerProtocol {
     var companyRepository: CompanyRepository { get }
     var holidayRepository: HolidayRepository { get }
     var shiftUseCase: ShiftUseCase { get }
-    var companyUseCase: CompanyUseCase { get }
+    var companyUseCase: CompanyUseCaseProtocol { get }
     var holidayUseCase: HolidayUseCase { get }
     var salaryUseCase: SalaryUseCaseProtocol { get }
     var payDayUseCase: PayDayUseCase { get }
@@ -45,7 +45,7 @@ final class DependencyContainer: ContainerProtocol {
         ShiftUseCase(shiftRepository: shiftRepository)
     }
     
-    var companyUseCase: CompanyUseCase {
+    var companyUseCase: CompanyUseCaseProtocol {
         CompanyUseCase(companyRepository: companyRepository)
     }
     

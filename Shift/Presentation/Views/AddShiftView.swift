@@ -213,7 +213,7 @@ struct CompanySelectionView: View {
     }
     
     private func fetchCompanies() async {
-        let companies = await container.companyUseCase.getCompanies()
+        let companies = await container.companyUseCase.getCompanies(descriptor: nil)
         await MainActor.run {
             self.companies = companies
         }

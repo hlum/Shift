@@ -11,14 +11,14 @@ final class CompanyListViewModel: ObservableObject {
     @Published var companies: [Company] = []
     @Published var showAddNewCompanySheet: Bool = false
     
-    private let companyUseCase: CompanyUseCase
+    private let companyUseCase: CompanyUseCaseProtocol
     
-    init(companyUseCase: CompanyUseCase) {
+    init(companyUseCase: CompanyUseCaseProtocol) {
         self.companyUseCase = companyUseCase
     }
     
     func fetchCompanies() async {
-        let companies = await companyUseCase.getCompanies()
+        let companies = await companyUseCase.getCompanies(descriptor: nil)
         await MainActor.run {
             self.companies = companies
         }
@@ -41,7 +41,7 @@ struct CompanyListView: View {
     @Environment(\.container) var container
     
     
-    init(companyUseCase: CompanyUseCase = MockCompanyUseCase()) {
+    init(companyUseCase: CompanyUseCaseProtocol = MockCompanyUseCase()) {
         _vm = .init(wrappedValue: .init(companyUseCase: companyUseCase))
     }
     var body: some View {

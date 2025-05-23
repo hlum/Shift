@@ -8,7 +8,12 @@
 import Foundation
 import SwiftData
 
-class CompanyUseCase {
+protocol CompanyUseCaseProtocol {
+    func getCompanies(descriptor: FetchDescriptor<Company>?) async -> [Company]
+    func addCompany(_ company: Company) async
+}
+
+class CompanyUseCase: CompanyUseCaseProtocol {
     private let companyRepository: CompanyRepository
     
     init(companyRepository: CompanyRepository) {
@@ -16,9 +21,9 @@ class CompanyUseCase {
     }
     
     
-    func getCompanies(descriptor: FetchDescriptor<Company> = FetchDescriptor<Company>()) async -> [Company] {
+    func getCompanies(descriptor: FetchDescriptor<Company>? = nil) async -> [Company] {
         do {
-            let companies = try await companyRepository.fetchCompanies(descriptor: descriptor)
+            let companies = try await companyRepository.fetchCompanies(descriptor: descriptor ?? FetchDescriptor<Company>())
             return companies
         } catch {
             Logger.standard.error("Error fetching companies:\(error.localizedDescription)")
@@ -35,8 +40,14 @@ class CompanyUseCase {
 }
 
 
-class MockCompanyUseCase: CompanyUseCase {
-    init() {
-        super.init(companyRepository: MockCompanyRepository())
+class MockCompanyUseCase: CompanyUseCaseProtocol {
+    let mockCompanyRepo = MockCompanyRepository()
+    
+    func getCompanies(descriptor: FetchDescriptor<Company>? = nil) async -> [Company] {
+        return (try? mockCompanyRepo.fetchCompanies(descriptor: descriptor ?? FetchDescriptor<Company>()))!
+    }
+    
+    func addCompany(_ company: Company) async {
+        mockCompanyRepo.addCompany(company)
     }
 }
