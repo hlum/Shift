@@ -32,7 +32,7 @@ struct CalendarView: View {
                 needToUpdateUI: $vm.needToUpdateUI,
                 publicHolidays: $vm.publicHolidays,
                 shifts: $vm.allShifts,
-                salaryDates: $vm.salaryDates
+                salaryDates: $vm.allSalaryDays
             )
             .frame(maxWidth: .infinity)
 
@@ -42,6 +42,16 @@ struct CalendarView: View {
                 selectedDateHeader(selectedDate: vm.selectedDate)
                 
                 List {
+                    ForEach(vm.salaryDaysForSelectedDate) { salaryDay in
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(salaryDay.company.name + "の給料日")
+                                .font(.headline)
+                            Text("¥\(Int(salaryDay.amount), format: .number)")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    
                     ForEach(vm.holidaysForSelectedDate) { holiday in
                         Text(holiday.name).foregroundStyle(.red)
                     }
