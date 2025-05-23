@@ -58,7 +58,7 @@ final class DependencyContainer: ContainerProtocol {
     }
     
     var payDayUseCase: PayDayUseCaseProtocol {
-        PayDayUseCase(holidayUseCase: holidayUseCase)
+        PayDayUseCase(holidayUseCase: holidayUseCase, salaryUseCase: salaryUseCase, shiftUseCase: shiftUseCase)
     }
 }
 
