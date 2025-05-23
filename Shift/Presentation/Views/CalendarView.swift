@@ -14,11 +14,12 @@ struct CalendarView: View {
     @StateObject var vm: CalendarViewModel
     @Environment(\.container) private var container
     
-    init(shiftUseCase: ShiftUseCase? = nil, holidayUseCase: HolidayUseCase? = nil) {
+    init(shiftUseCase: ShiftUseCase? = nil, holidayUseCase: HolidayUseCase? = nil, payDayUseCase: PayDayUseCase? = nil) {
         _vm = .init(
             wrappedValue: .init(
                 shiftUseCase: shiftUseCase ?? MockShiftUseCase(),
-                holidayUseCase: holidayUseCase ?? MockHolidayUseCase()
+                holidayUseCase: holidayUseCase ?? MockHolidayUseCase(),
+                paydayUseCase: payDayUseCase ?? MockPayDayUseCase()
             )
         )
     }

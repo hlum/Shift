@@ -28,10 +28,12 @@ final class CalendarViewModel: ObservableObject {
     
     private let shiftUseCase: ShiftUseCase
     private let holidayUseCase: HolidayUseCase
+    private let payDayUseCase: PayDayUseCase
     
-    init(shiftUseCase: ShiftUseCase, holidayUseCase: HolidayUseCase) {
+    init(shiftUseCase: ShiftUseCase, holidayUseCase: HolidayUseCase, paydayUseCase: PayDayUseCase) {
         self.shiftUseCase = shiftUseCase
         self.holidayUseCase = holidayUseCase
+        self.payDayUseCase = paydayUseCase
         self.addListenerToSelectedDate()
 
         Task {
