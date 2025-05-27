@@ -51,7 +51,8 @@
 				Helper/Logger/Logger.swift,
 				UseCases/CompanyUseCase.swift,
 				UseCases/HolidayUseCase.swift,
-				UseCases/PayDayUseCase.swift,
+				UseCases/SalaryDayUseCase.swift,
+				UseCases/SalaryUseCase.swift,
 				UseCases/ShiftUseCase.swift,
 			);
 			target = 7F0D75922DD70FD50061261B /* ShiftTests */;

@@ -31,9 +31,9 @@ final class CalendarViewModel: ObservableObject {
     
     private let shiftUseCase: ShiftUseCaseProtocol
     private let holidayUseCase: HolidayUseCaseProtocol
-    private let payDayUseCase: PayDayUseCaseProtocol
+    private let payDayUseCase: SalaryDayUseCaseProtocol
     
-    init(shiftUseCase: ShiftUseCaseProtocol, holidayUseCase: HolidayUseCaseProtocol, paydayUseCase: PayDayUseCaseProtocol) {
+    init(shiftUseCase: ShiftUseCaseProtocol, holidayUseCase: HolidayUseCaseProtocol, paydayUseCase: SalaryDayUseCaseProtocol) {
         self.shiftUseCase = shiftUseCase
         self.holidayUseCase = holidayUseCase
         self.payDayUseCase = paydayUseCase
@@ -84,9 +84,8 @@ final class CalendarViewModel: ObservableObject {
     
     @MainActor
     func getSalaryDate() async {
-        let differentMonthAndCompanyShifts = shiftUseCase.getShiftsWithDifferentMonthsAndCompany(from: allShifts)
         do {
-            self.allSalaryDays = try await payDayUseCase.getSalaryDays(differentMonthAndCompanyShifts: differentMonthAndCompanyShifts)
+            self.allSalaryDays = try await payDayUseCase.getSalaryDays(for: allShifts)
         } catch {
             Logger.error("Can't get salaryDay date: \(error.localizedDescription)", category: .calendar)
         }
@@ -99,13 +98,9 @@ final class CalendarViewModel: ObservableObject {
             return
         }
         
-        do {
-            let result = allSalaryDays.filter { $0.date == selectedDate }
-            self.salaryDaysForSelectedDate = result
-        } catch {
-            Logger.standard.error("Error filtering salary days: \(error.localizedDescription)")
-            self.salaryDaysForSelectedDate = []
-        }
+        let result = allSalaryDays.filter { $0.date == selectedDate }
+        self.salaryDaysForSelectedDate = result
+        
     }
 
     @MainActor
