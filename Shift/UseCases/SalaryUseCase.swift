@@ -5,10 +5,10 @@ protocol SalaryUseCaseProtocol {
 }
 
 final class SalaryUseCase: SalaryUseCaseProtocol {
-    private let holidayUseCase: HolidayUseCase
+    private let holidayUseCase: HolidayUseCaseProtocol
     private let salaryCalculator: SalaryCalculator
     
-    init(holidayUseCase: HolidayUseCase, salaryCalculator: SalaryCalculator = SalaryCalculatorImpl()) {
+    init(holidayUseCase: HolidayUseCaseProtocol, salaryCalculator: SalaryCalculator = SalaryCalculatorImpl()) {
         self.holidayUseCase = holidayUseCase
         self.salaryCalculator = salaryCalculator
     }
@@ -22,8 +22,7 @@ final class SalaryUseCase: SalaryUseCaseProtocol {
                 let salary = company.salary
                 
                 let holidays = await holidayUseCase.fetchHolidaysAndWeekends(
-                    between: DateInterval(start: shift.startTime, end: shift.endTime),
-                    countryCode: countryCode
+                    between: DateInterval(start: shift.startTime, end: shift.endTime)
                 )
                 
                 let segments = ShiftSplitter.shared.splitShiftByDay(

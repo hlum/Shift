@@ -15,6 +15,7 @@ struct FSCalendarView: UIViewRepresentable {
     @Binding var needToUpdateUI: Bool
     @Binding var publicHolidays: [Holiday]
     @Binding var shifts: [Shift]
+    @Binding var salaryDates: [SalaryDay]
     @Environment(\.container) private var container
     @Environment(\.locale) private var locale
 
@@ -67,12 +68,12 @@ struct FSCalendarView: UIViewRepresentable {
     class Coordinator: NSObject, FSCalendarDelegate, FSCalendarDataSource, FSCalendarDelegateAppearance {
         weak var calendar: FSCalendar?
         var parent: FSCalendarView
-        var shiftUseCase: ShiftUseCase
-        var holidayUseCase: HolidayUseCase
+        var shiftUseCase: ShiftUseCaseProtocol
+        var holidayUseCase: HolidayUseCaseProtocol
         let dateFormatter = DateFormatter()
 
         
-        init(parent: FSCalendarView, shiftUseCase: ShiftUseCase, holidayUseCase: HolidayUseCase) {
+        init(parent: FSCalendarView, shiftUseCase: ShiftUseCaseProtocol, holidayUseCase: HolidayUseCaseProtocol) {
             self.parent = parent
             self.shiftUseCase = shiftUseCase
             self.holidayUseCase = holidayUseCase
@@ -83,7 +84,13 @@ struct FSCalendarView: UIViewRepresentable {
             parent.selectedDate = date
         }
         
-        
+        func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, fillDefaultColorFor date: Date) -> UIColor? {
+            // Find the SalaryDate for the given date
+            if let salaryDate = parent.salaryDates.first(where: { Calendar.current.isDate($0.date, inSameDayAs: date) }) {
+                return .brown
+            }
+            return nil
+        }
         func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, titleDefaultColorFor date: Date) -> UIColor? {
             let isPublicHoliday = parent.publicHolidays.contains(where: { Calendar.current.isDate($0.date, inSameDayAs: date) })
             if  isPublicHoliday || holidayUseCase.isWeekend(date) {

@@ -14,11 +14,12 @@ struct CalendarView: View {
     @StateObject var vm: CalendarViewModel
     @Environment(\.container) private var container
     
-    init(shiftUseCase: ShiftUseCase? = nil, holidayUseCase: HolidayUseCase? = nil) {
+    init(shiftUseCase: ShiftUseCaseProtocol? = nil, holidayUseCase: HolidayUseCaseProtocol? = nil, payDayUseCase: SalaryDayUseCaseProtocol? = nil) {
         _vm = .init(
             wrappedValue: .init(
                 shiftUseCase: shiftUseCase ?? MockShiftUseCase(),
-                holidayUseCase: holidayUseCase ?? MockHolidayUseCase()
+                holidayUseCase: holidayUseCase ?? MockHolidayUseCase(),
+                paydayUseCase: payDayUseCase ?? MockPayDayUseCase()
             )
         )
     }
@@ -30,7 +31,8 @@ struct CalendarView: View {
                 selectedDate: $vm.selectedDate,
                 needToUpdateUI: $vm.needToUpdateUI,
                 publicHolidays: $vm.publicHolidays,
-                shifts: $vm.allShifts
+                shifts: $vm.allShifts,
+                salaryDates: $vm.allSalaryDays
             )
             .frame(maxWidth: .infinity)
 
@@ -40,6 +42,16 @@ struct CalendarView: View {
                 selectedDateHeader(selectedDate: vm.selectedDate)
                 
                 List {
+                    ForEach(vm.salaryDaysForSelectedDate) { salaryDay in
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(salaryDay.company.name + "の給料日")
+                                .font(.headline)
+                            Text("¥\(Int(salaryDay.amount), format: .number)")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    
                     ForEach(vm.holidaysForSelectedDate) { holiday in
                         Text(holiday.name).foregroundStyle(.red)
                     }
@@ -79,6 +91,7 @@ struct CalendarView: View {
             // On Dismiss
             Task { @MainActor in
                 await vm.fetchAllShifts()
+                await vm.getSalaryDate()
                 vm.getShiftForSelectedDate(for: vm.selectedDate)
                 vm.updateUI()
             }

@@ -280,7 +280,7 @@ final class SalaryCalculatorImpl: SalaryCalculator {
     
     private func debug(for shift: String, _ text: String) {
         if shift == self.debugShift {
-            Logger.standard.info("\(text)")
+            Logger.info(text, category: .salary)
         }
     }
 }

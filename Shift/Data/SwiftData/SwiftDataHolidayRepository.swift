@@ -27,7 +27,7 @@ final class SwiftDataHolidayRepository: HolidayRepository {
         
         guard let startOfDay = calendar.date(from: DateComponents(year: components.year ,month: components.month, day: components.day, hour: 0, minute: 0, second: 0)),
               let startOfTomorrow = calendar.date(from: DateComponents(year: components.year ,month: components.month, day: components.day! + 1, hour: 0, minute: 0,second: 0)) else {
-            Logger.standard.fault("Can't create startOfDay or startOfTomorrow")
+            Logger.fault("Can't create startOfDay or startOfTomorrow", category: .holiday)
             return []
         }
 
@@ -80,7 +80,7 @@ final class SwiftDataHolidayRepository: HolidayRepository {
                     second: 0
                 )
               ) else {
-            Logger.standard.fault("Can't create startOfDay or startOfTomorrow")
+            Logger.fault("Can't create startOfDay or startOfTomorrow", category: .holiday)
             return []
         }
         
@@ -104,7 +104,7 @@ extension SwiftDataHolidayRepository {
         let (last, current, next) = try await isAllThreeYearHolidayDataLoaded(currentYear: year, countryCode: countryCode)
         
         if last && current && next {
-            Logger.standard.info("All three year holiday data already loaded for year: \(year) \(countryCode)")
+            Logger.info("All three year holiday data already loaded for year: \(year) \(countryCode)", category: .holiday)
             return
         }
         
@@ -170,7 +170,7 @@ extension SwiftDataHolidayRepository {
             context.insert(model)
             holidays.append(model)
         }
-        Logger.standard.info("holidays saved to swiftData count: \(holidays.count)")
+        Logger.info("holidays saved to swiftData count: \(holidays.count)", category: .holiday)
         try context.save()
         return holidays
     }

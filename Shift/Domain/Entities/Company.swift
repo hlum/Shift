@@ -45,6 +45,22 @@ enum SettlementDate: Codable, Equatable, Hashable {
         }
     }
     
+    
+    func settlementPeriod(forMonth month: Int, year: Int, calendar: Calendar = .current) -> DateInterval {
+        let settlementDate = self.toDate(forMonth: month, year: year)!
+        
+        var end = Calendar.current.date(byAdding: .day, value: 1, to: settlementDate)!
+        end = calendar.startOfDay(for: end)
+        
+        var start = calendar.date(byAdding: .month, value: -1, to: settlementDate)!
+        start = Calendar.current.date(byAdding: .day, value: 1, to: start)!
+        start = Calendar.current.startOfDay(for: start)
+
+        
+        return DateInterval(start: start, end: end)
+    }
+    
+    
     func toDate(forMonth month: Int, year: Int, calendar: Calendar = .current) -> Date? {
         var components = DateComponents()
         components.year = year

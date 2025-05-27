@@ -15,6 +15,9 @@ final class CalendarViewModel: ObservableObject {
     @Published var shiftsForSelectedDate: [Shift] = []
     @Published var allShifts: [Shift] = []
     
+    @Published var allSalaryDays: [SalaryDay] = []
+    @Published var salaryDaysForSelectedDate: [SalaryDay] = []
+    
     @Published var holidaysForSelectedDate: [Holiday] = []
     @Published var publicHolidays: [Holiday] = []
     
@@ -26,16 +29,19 @@ final class CalendarViewModel: ObservableObject {
     
     @Published var error: Error?
     
-    private let shiftUseCase: ShiftUseCase
-    private let holidayUseCase: HolidayUseCase
+    private let shiftUseCase: ShiftUseCaseProtocol
+    private let holidayUseCase: HolidayUseCaseProtocol
+    private let payDayUseCase: SalaryDayUseCaseProtocol
     
-    init(shiftUseCase: ShiftUseCase, holidayUseCase: HolidayUseCase) {
+    init(shiftUseCase: ShiftUseCaseProtocol, holidayUseCase: HolidayUseCaseProtocol, paydayUseCase: SalaryDayUseCaseProtocol) {
         self.shiftUseCase = shiftUseCase
         self.holidayUseCase = holidayUseCase
+        self.payDayUseCase = paydayUseCase
         self.addListenerToSelectedDate()
 
         Task {
             await fetchAllShifts()
+            await getSalaryDate()
             await self.getShiftForSelectedDate(for: Date())
         }
         fetchAllHolidays()
@@ -54,6 +60,7 @@ final class CalendarViewModel: ObservableObject {
                 Task {
                     await self?.getShiftForSelectedDate(for: date)
                     await self?.getHoliday(for: date)
+                    await self?.fetchSalaryDay(selectedDate: date)
                 }
             }
             .store(in: &cancellables)
@@ -65,7 +72,7 @@ final class CalendarViewModel: ObservableObject {
         error = nil
         
         do {
-            self.allShifts = try await shiftUseCase.fetchShifts()
+            self.allShifts = try await shiftUseCase.fetchShifts(descriptor: nil)
             self.isLoading = false
             self.error = nil
         } catch {
@@ -73,9 +80,29 @@ final class CalendarViewModel: ObservableObject {
             self.isLoading = false
             print("Error fetching shifts: \(error.localizedDescription)")
         }
-        
     }
     
+    @MainActor
+    func getSalaryDate() async {
+        do {
+            self.allSalaryDays = try await payDayUseCase.getSalaryDays(for: allShifts)
+        } catch {
+            Logger.error("Can't get salaryDay date: \(error.localizedDescription)", category: .calendar)
+        }
+    }
+    
+    @MainActor
+    private func fetchSalaryDay(selectedDate: Date) {
+        guard !allSalaryDays.isEmpty else {
+            Logger.warning("SalaryDays is empty.", category: .calendar)
+            return
+        }
+        
+        let result = allSalaryDays.filter { $0.date == selectedDate }
+        self.salaryDaysForSelectedDate = result
+        
+    }
+
     @MainActor
     func getShiftForSelectedDate(for date: Date) {
         isLoading = true
@@ -90,6 +117,7 @@ final class CalendarViewModel: ObservableObject {
         }
         
     }
+    
     
     @MainActor
     func getHoliday(for date: Date) {
@@ -113,7 +141,9 @@ final class CalendarViewModel: ObservableObject {
         do {
             try await shiftUseCase.deleteShift(shift)
             await fetchAllShifts()
+            await getSalaryDate()
             getShiftForSelectedDate(for: selectedDate)
+            fetchSalaryDay(selectedDate: selectedDate)
             updateUI()
             
         } catch {
@@ -136,7 +166,8 @@ extension CalendarViewModel {
     static func preview() -> CalendarViewModel {
         let viewModel = CalendarViewModel(
             shiftUseCase: MockShiftUseCase(),
-            holidayUseCase: MockHolidayUseCase()
+            holidayUseCase: MockHolidayUseCase(),
+            paydayUseCase: MockPayDayUseCase()
         )
         
         return viewModel

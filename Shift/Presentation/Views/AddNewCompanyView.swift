@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 final class AddNewCompanyViewModel: ObservableObject {
-    private var companyUseCase: CompanyUseCase
+    private var companyUseCase: CompanyUseCaseProtocol
     
     @Published var companyName: String = ""
     @Published var selectedColor: ColorName = .blue
@@ -36,7 +36,7 @@ final class AddNewCompanyViewModel: ObservableObject {
     @Published var error: Error?
     @Published var isLoading: Bool = false
     
-    init(companyUseCase: CompanyUseCase) {
+    init(companyUseCase: CompanyUseCaseProtocol) {
         self.companyUseCase = companyUseCase
     }
     
@@ -112,7 +112,7 @@ struct AddNewCompanyView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.container) private var container
     
-    init(companyUseCase: CompanyUseCase = MockCompanyUseCase()) {
+    init(companyUseCase: CompanyUseCaseProtocol = MockCompanyUseCase()) {
         // Initialize with a temporary view model that will be updated when the view appears
         _vm = StateObject(wrappedValue: AddNewCompanyViewModel(companyUseCase: companyUseCase))
     }
