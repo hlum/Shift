@@ -33,7 +33,7 @@ struct ShiftApp: App {
             MainTabView()
                 .injectDependencies(container)
                 .onAppear {
-                    Logger.standard.info("\(URL.applicationSupportDirectory.path(percentEncoded: false))")
+                    Logger.info("\(URL.applicationSupportDirectory.path(percentEncoded: false))", category: .general)
                 }
         }
         .modelContainer(container.modelContext.container)

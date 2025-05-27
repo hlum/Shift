@@ -26,7 +26,7 @@ class CompanyUseCase: CompanyUseCaseProtocol {
             let companies = try await companyRepository.fetchCompanies(descriptor: descriptor ?? FetchDescriptor<Company>())
             return companies
         } catch {
-            Logger.standard.error("Error fetching companies:\(error.localizedDescription)")
+            Logger.error("Error fetching companies:\(error.localizedDescription)", category: .company)
             return []
         }
     }

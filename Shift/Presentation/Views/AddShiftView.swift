@@ -52,7 +52,7 @@ final class AddShiftViewModel: ObservableObject {
             errorMessage = nil
             return true
         } catch {
-            Logger.standard.error("Error adding shift: \(error.localizedDescription)")
+            Logger.error("Error adding shift: \(error.localizedDescription)", category: .shift)
             return false
         }
     }

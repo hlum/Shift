@@ -88,14 +88,14 @@ final class CalendarViewModel: ObservableObject {
         do {
             self.allSalaryDays = try await payDayUseCase.getSalaryDays(differentMonthAndCompanyShifts: differentMonthAndCompanyShifts)
         } catch {
-            Logger.standard.error("Can't get salaryDay date: \(error.localizedDescription)")
+            Logger.error("Can't get salaryDay date: \(error.localizedDescription)", category: .calendar)
         }
     }
     
     @MainActor
     private func fetchSalaryDay(selectedDate: Date) {
         guard !allSalaryDays.isEmpty else {
-            Logger.standard.warning("SalaryDays is empty.")
+            Logger.warning("SalaryDays is empty.", category: .calendar)
             return
         }
         
