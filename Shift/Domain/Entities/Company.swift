@@ -1,0 +1,112 @@
+//
+//  Company.swift
+//  Shift
+//
+//  Created by cmStudent on 2025/05/03.
+//
+
+import Foundation
+import SwiftData
+import SwiftUI
+
+@Model
+final class Company: Identifiable{
+    @Attribute(.unique)
+    var id: String = UUID().uuidString
+    var name: String
+    var color: ColorName
+    var settleMentDate: SettlementDate
+    var payDay: PayDay
+    var salary: Salary
+    
+    @Relationship(deleteRule: .cascade)
+    var shifts: [Shift] = []
+    
+    
+    init(name: String, color: ColorName, endDate: SettlementDate, payDay: PayDay, salary: Salary, shifts: [Shift] = []) {
+        self.name = name
+        self.color = color
+        self.settleMentDate = endDate
+        self.payDay = payDay
+        self.salary = salary
+        self.shifts = shifts
+    }
+}
+
+enum SettlementDate: Codable, Equatable, Hashable {
+    case day(Int)        // 1 to 30
+    case endOfMonth      // Special case for "end of month"
+    
+    
+    var displayString: String {
+        switch self {
+        case .day(let num): return "\(num)"
+        case .endOfMonth: return NSLocalizedString("End of Month", comment: "")
+        }
+    }
+    
+    
+    func settlementPeriod(forMonth month: Int, year: Int, calendar: Calendar = .current) -> DateInterval {
+        let settlementDate = self.toDate(forMonth: month, year: year)!
+        
+        var end = Calendar.current.date(byAdding: .day, value: 1, to: settlementDate)!
+        end = calendar.startOfDay(for: end)
+        
+        var start = calendar.date(byAdding: .month, value: -1, to: settlementDate)!
+        start = Calendar.current.date(byAdding: .day, value: 1, to: start)!
+        start = Calendar.current.startOfDay(for: start)
+
+        
+        return DateInterval(start: start, end: end)
+    }
+    
+    
+    func toDate(forMonth month: Int, year: Int, calendar: Calendar = .current) -> Date? {
+        var components = DateComponents()
+        components.year = year
+        components.month = month
+        
+        switch self {
+        case .day(let day):
+            components.day = day
+        case .endOfMonth:
+            // Get the last day of the month
+            if let range = calendar.range(of: .day, in: .month, for: calendar.date(from: components)!) {
+                components.day = range.count
+            } else {
+                return nil
+            }
+        }
+        return calendar.date(from: components)
+    }
+}
+
+
+enum ColorName: String, Codable, CaseIterable {
+    case red
+    case green
+    case blue
+    case orange
+    case customPink
+    
+    var color: Color {
+        switch self {
+        case .red: return .red
+        case .green: return .green
+        case .blue: return .blue
+        case .orange: return .orange
+        case .customPink: return Color.pink.opacity(0.7)
+        }
+    }
+    
+    var disPlayName: String {
+        switch self {
+        case .red: return NSLocalizedString("Red", comment: "")
+        case .green: return NSLocalizedString("Green", comment: "")
+        case .blue: return NSLocalizedString("Blue", comment: "")
+        case .orange: return NSLocalizedString("Orange", comment: "")
+        case .customPink: return NSLocalizedString("Custom Pink", comment: "")
+        }
+    }
+}
+

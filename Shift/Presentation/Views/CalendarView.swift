@@ -1,0 +1,149 @@
+//
+//  ContentView.swift
+//  Shift
+//
+//  Created by cmStudent on 2025/05/02.
+//
+
+import SwiftUI
+import SwiftData
+
+
+
+struct CalendarView: View {
+    @StateObject var vm: CalendarViewModel
+    @Environment(\.container) private var container
+    
+    init(shiftUseCase: ShiftUseCaseProtocol? = nil, holidayUseCase: HolidayUseCaseProtocol? = nil, payDayUseCase: SalaryDayUseCaseProtocol? = nil) {
+        _vm = .init(
+            wrappedValue: .init(
+                shiftUseCase: shiftUseCase ?? MockShiftUseCase(),
+                holidayUseCase: holidayUseCase ?? MockHolidayUseCase(),
+                paydayUseCase: payDayUseCase ?? MockPayDayUseCase()
+            )
+        )
+    }
+    
+    var body: some View {
+        
+        VStack {
+            FSCalendarView(
+                selectedDate: $vm.selectedDate,
+                needToUpdateUI: $vm.needToUpdateUI,
+                publicHolidays: $vm.publicHolidays,
+                shifts: $vm.allShifts,
+                salaryDates: $vm.allSalaryDays
+            )
+            .frame(maxWidth: .infinity)
+
+
+            
+            VStack {
+                selectedDateHeader(selectedDate: vm.selectedDate)
+                
+                List {
+                    ForEach(vm.salaryDaysForSelectedDate) { salaryDay in
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(salaryDay.company.name + "の給料日")
+                                .font(.headline)
+                            Text("¥\(Int(salaryDay.amount), format: .number)")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    
+                    ForEach(vm.holidaysForSelectedDate) { holiday in
+                        Text(holiday.name).foregroundStyle(.red)
+                    }
+                    ForEach(vm.shiftsForSelectedDate) { shift in
+                        ShiftSubView(shift: shift)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button {
+                                    Task { @MainActor in
+                                        await vm.deleteShift(shift)
+                                    }
+                                } label: {
+                                    Image(systemName: "trash")
+                                        .tint(.red)
+                                }
+
+                            }
+                    }
+                    Button {
+                        vm.showAddShiftView.toggle()
+                    } label: {
+                        let addShiftString = NSLocalizedString("Add Shift", comment: "")
+                        Text("+ " + addShiftString)
+                            .font(.headline)
+                            .foregroundStyle(.blue)
+                    }
+
+                }
+                
+
+            }
+            .listStyle(.plain)
+            .frame(maxWidth: .infinity)
+            .frame(height: UIScreen.main.bounds.height * 0.4)
+            
+        }
+        .fullScreenCover(isPresented: $vm.showAddShiftView) {
+            // On Dismiss
+            Task { @MainActor in
+                await vm.fetchAllShifts()
+                await vm.getSalaryDate()
+                vm.getShiftForSelectedDate(for: vm.selectedDate)
+                vm.updateUI()
+            }
+        } content: {
+            AddShiftView(shiftUseCase: container.shiftUseCase, selectedDate: $vm.selectedDate)
+        }
+
+        
+    }
+    
+    @ViewBuilder
+    func selectedDateHeader(selectedDate: Date) -> some View {
+        Text(selectedDate.formatted(date: .abbreviated, time: .omitted))
+            .padding(.horizontal)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(height: 30)
+            .background(.gray.opacity(0.1))
+            .foregroundStyle(vm.holidaysForSelectedDate.count > 0 ? .red : .black)
+        
+    }
+}
+
+
+struct ShiftSubView: View {
+    let shift: Shift
+    var body: some View {
+        HStack {
+            VStack {
+                Text(shift.startTime.formatted(.dateTime.hour().minute()))
+                Text(shift.endTime.formatted(.dateTime.hour().minute()))
+            }
+            
+            Rectangle()
+                .frame(width: 1)
+                .frame(maxHeight: .infinity)
+                .foregroundStyle(shift.company.color.color)
+            
+            
+            Text(shift.name)
+                .font(.headline)
+            
+            Spacer()
+            
+        }
+        .frame(height: 50)
+    }
+}
+
+
+#Preview {
+    CalendarView()
+        .injectDependencies(DependencyContainer(
+            modelContainer: try! ModelContainer(for: Schema([Company.self, Shift.self]))
+        ))
+}
